@@ -13,6 +13,11 @@ abstract class AbstractGarParserCommand extends Command
      */
     protected $garDateFormat = 'Y.m.d';
 
+    /**
+     * Нужный файл лежит в папке региона или отдельно?
+     */
+    protected $isSpecificForRegion = true;
+
     
     /**
      * Execute the console command.
@@ -25,20 +30,25 @@ abstract class AbstractGarParserCommand extends Command
 
         $dir = $this->getDirectoryIteratorForDate();
 
+        if (! $this->isSpecificForRegion) {
+            $this->parseDirectory($dir);
+            return true;
+        }
+
         if ($this->argument('region') === 'all') {
             foreach ($dir as $item) {
                 if ($item->isDot() || $item->isFile()) {
                     continue;
                 }
 
-                $this->parseRegionDirectory(new DirectoryIterator($item->getRealPath()));
+                $this->parseDirectory(new DirectoryIterator($item->getRealPath()));
             }
 
             return true;
         }
 
         try {
-            $this->parseRegionDirectory(new DirectoryIterator($dir->getRealPath() . '/' . $this->argument('region')));
+            $this->parseDirectory(new DirectoryIterator($dir->getRealPath() . '/' . $this->argument('region')));
         } catch (\UnexpectedValueException $e) {
             echo sprintf(
                 "Ошибка при открытии папки для запрошенной даты (%s) и региона (%s)\n%s\n",
@@ -86,7 +96,7 @@ abstract class AbstractGarParserCommand extends Command
      * @param DirectoryIterator $dir папка с выгрузкой по региону
      * @return void
      */
-    protected function parseRegionDirectory(DirectoryIterator $dir): void
+    protected function parseDirectory(DirectoryIterator $dir): void
     {
         /**
          * @var SplFileInfo $file
