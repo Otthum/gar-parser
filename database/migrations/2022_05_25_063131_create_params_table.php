@@ -22,6 +22,7 @@ return new class extends Migration
             $table->bigInteger('change_end_id')->unsigned()->comment('id записи изменения, которая отклонила это изменение')->default(0);
             $table->bigInteger('type_id')->unsigned()->comment('id параметра из AS_PARAM_TYPES');
             $table->text('value')->comment('Значение параметра');
+            $table->date('update_date')->comment('Дата обновления записи');
             $table->date('start_date')->comment('Дата начала действия записи');
             $table->date('end_date')->comment('Дата окончания действия записи');
 

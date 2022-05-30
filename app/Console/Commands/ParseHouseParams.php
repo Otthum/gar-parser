@@ -39,6 +39,7 @@ class ParseHouseParams extends AbstractGarParserCommand
             'change_end_id' => $attributes['CHANGEIDEND'],
             'type_id' => $attributes['TYPEID'],
             'value' => $attributes['VALUE'],
+            'update_date' => $attributes['UPDATEDATE'],
             'start_date' => $attributes['STARTDATE'],
             'end_date' => $attributes['ENDDATE'],
         ];
