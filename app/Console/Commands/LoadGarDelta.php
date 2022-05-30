@@ -74,7 +74,6 @@ class LoadGarDelta extends Command
         }
 
         $this->call('gar:parse:param-types', ['date' => $date->format('c')]);
-        $this->call('gar:parse:house-params', ['date' => $date->format('c')]);
         $this->call('gar:parse:add-house-types', ['date' => $date->format('c')]);
         $this->call('gar:parse:addr-obj-types', ['date' => $date->format('c')]);
         $this->call('gar:parse:appart-types', ['date' => $date->format('c')]);
@@ -83,6 +82,9 @@ class LoadGarDelta extends Command
         $this->call('gar:parse:room-types', ['date' => $date->format('c')]);
         $this->call('gar:parse:doc-kinds', ['date' => $date->format('c')]);
         $this->call('gar:parse:doc-types', ['date' => $date->format('c')]);
+        $this->call('gar:parse:house-types', ['date' => $date->format('c')]);
+        
+        $this->call('gar:parse:house-params', ['date' => $date->format('c')]);
     }
 
     /**
