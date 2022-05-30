@@ -29,24 +29,21 @@ class ParseParamTypes extends AbstractGarParserCommand
 
     protected $isSpecificForRegion = false;
 
+    protected $parsingClass = ParamType::class;
+
 
     protected function parseItem(SimpleXMLElement $item)
     {
         $attributes = $item->attributes();
-        $param = ParamType::updateOrCreate(
-            [
-                'gar_id' => $attributes['ID'],
-            ],
-            [
-                'gar_id' => $attributes['ID'],
-                'name' => $attributes['NAME'],
-                'code' => $attributes['DESC'],
-                'desc' => $attributes['CODE'],
-                'update_date' => $attributes['UPDATEDATE'],
-                'start_date' => $attributes['STARTDATE'],
-                'end_date' => $attributes['ENDDATE'],
-                'is_active' => filter_var($attributes['ISACTIVE'], FILTER_VALIDATE_BOOL),
-            ]
-        );
+        return [
+            'gar_id' => $attributes['ID'],
+            'name' => $attributes['NAME'],
+            'code' => $attributes['DESC'],
+            'desc' => $attributes['CODE'],
+            'update_date' => $attributes['UPDATEDATE'],
+            'start_date' => $attributes['STARTDATE'],
+            'end_date' => $attributes['ENDDATE'],
+            'is_active' => filter_var($attributes['ISACTIVE'], FILTER_VALIDATE_BOOL),
+        ];
     }
 }

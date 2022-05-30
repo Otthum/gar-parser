@@ -26,24 +26,21 @@ class ParseHouseParams extends AbstractGarParserCommand
      */
     protected $fileNamePattern = '~AS_HOUSES_PARAMS_.+?\.xml~i';
 
+    protected $parsingClass = Param::class;
+
 
     protected function parseItem(SimpleXMLElement $item)
     {
         $attributes = $item->attributes();
-        $param = Param::updateOrCreate(
-            [
-                'gar_id' => $attributes['ID'],
-            ],
-            [
-                'gar_id' => $attributes['ID'],
-                'object_id' => $attributes['OBJECTID'],
-                'change_id' => $attributes['CHANGEID'],
-                'change_end_id' => $attributes['CHANGEENDID'],
-                'type_id' => $attributes['TYPEID'],
-                'value' => $attributes['VALUE'],
-                'start_date' => $attributes['STARTDATE'],
-                'end_date' => $attributes['ENDDATE'],
-            ]
-        );
+        return [
+            'gar_id' => $attributes['ID'],
+            'object_id' => $attributes['OBJECTID'],
+            'change_id' => $attributes['CHANGEID'],
+            'change_end_id' => $attributes['CHANGEIDEND'],
+            'type_id' => $attributes['TYPEID'],
+            'value' => $attributes['VALUE'],
+            'start_date' => $attributes['STARTDATE'],
+            'end_date' => $attributes['ENDDATE'],
+        ];
     }
 }

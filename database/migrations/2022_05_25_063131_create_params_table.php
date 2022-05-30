@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('params', function (Blueprint $table) {
             $table->id();
 
-            $table->bigInteger('gar_id')->unsigned()->comment('id записи из справочника ГАР');
+            $table->bigInteger('gar_id')->unsigned()->unique()->comment('id записи из справочника ГАР');
             $table->bigInteger('object_id')->unsigned()->comment('id объекта из справочника ГАР к которому относится параметр');
             $table->bigInteger('change_id')->unsigned()->comment('id записи изменения из AS_CHANGE_HISTORY');
             $table->bigInteger('change_end_id')->unsigned()->comment('id записи изменения, которая отклонила это изменение')->default(0);

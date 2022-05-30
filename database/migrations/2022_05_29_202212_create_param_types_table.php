@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('param_types', function (Blueprint $table) {
             $table->id();
 
-            $table->bigInteger('gar_id')->comment('id из AS_PARAM_TYPES');
+            $table->bigInteger('gar_id')->unsigned()->unique()->comment('id из AS_PARAM_TYPES');
             $table->string('name')->comment('Название параметра');
             $table->string('code')->comment('Кодовое обозначение');
             $table->string('desc')->comment('Описание');

@@ -18,6 +18,16 @@ abstract class AbstractGarParserCommand extends Command
      */
     protected $isSpecificForRegion = true;
 
+    /**
+     * Массив спаршенных данных
+     */
+    protected $parsedItems = [];
+
+    /**
+     * Через какое кол-во строк запускать обновление базы
+     */
+    protected $commitCount = 2000;
+
     
     /**
      * Execute the console command.
@@ -115,12 +125,35 @@ abstract class AbstractGarParserCommand extends Command
             echo sprintf("Найдено %d записей\n", $xml->count());
 
             foreach ($xml->children() as $item) {
-                $this->parseItem($item);
+                $this->items[] = $this->parseItem($item);
+
+                if (count($this->items) % $this->commitCount === 0) {
+                    $this->commit();
+
+                    /**
+                     * Чистим массив элементов т.к. memory limit overflow
+                     */
+                    $this->items = [];
+                }
+                
             }
         }
 
+
         echo "\n";
 
+    }
+
+    /**
+     * Записывает изменения в базу одним запросом
+     */
+    protected function commit()
+    {
+        if (property_exists($this, 'parsingClass')) {
+            $this->parsingClass::upsert($this->parsedItems, ['gar_id']);
+        } else {
+            throw new \Exception(sprintf("Класс %s не имеет параметра `parsingClass`. Не удалось сохранить изменения.", static::class));
+        }
     }
 
     /**
