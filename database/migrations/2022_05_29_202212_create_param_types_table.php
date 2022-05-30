@@ -19,7 +19,7 @@ return new class extends Migration
             $table->bigInteger('gar_id')->unsigned()->unique()->comment('id из AS_PARAM_TYPES');
             $table->string('name')->comment('Название параметра');
             $table->string('code')->comment('Кодовое обозначение');
-            $table->string('desc')->comment('Описание');
+            $table->string('desc')->nullable()->comment('Описание');
             $table->date('update_date')->comment('Дата обновления записи');
             $table->date('start_date')->comment('Дата начала действия записи');
             $table->date('end_date')->comment('Дата окончания действия записи');

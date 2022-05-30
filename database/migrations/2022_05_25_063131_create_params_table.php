@@ -18,7 +18,7 @@ return new class extends Migration
 
             $table->bigInteger('gar_id')->unsigned()->unique()->comment('id записи из справочника ГАР');
             $table->bigInteger('object_id')->unsigned()->comment('id объекта из справочника ГАР к которому относится параметр');
-            $table->bigInteger('change_id')->unsigned()->comment('id записи изменения из AS_CHANGE_HISTORY');
+            $table->bigInteger('change_id')->nullable()->unsigned()->comment('id записи изменения из AS_CHANGE_HISTORY');
             $table->bigInteger('change_end_id')->unsigned()->comment('id записи изменения, которая отклонила это изменение')->default(0);
             $table->bigInteger('type_id')->unsigned()->comment('id параметра из AS_PARAM_TYPES');
             $table->text('value')->comment('Значение параметра');
