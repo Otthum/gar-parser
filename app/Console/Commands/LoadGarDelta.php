@@ -84,6 +84,7 @@ class LoadGarDelta extends Command
         $this->call('gar:parse:doc-types', ['date' => $date->format('c')]);
         $this->call('gar:parse:house-types', ['date' => $date->format('c')]);
         
+        $this->call('gar:parse:houses', ['date' => $date->format('c')]);
         $this->call('gar:parse:house-params', ['date' => $date->format('c')]);
     }
 
