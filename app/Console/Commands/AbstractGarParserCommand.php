@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use DirectoryIterator;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use SimpleXMLElement;
 
 abstract class AbstractGarParserCommand extends Command
@@ -36,6 +37,12 @@ abstract class AbstractGarParserCommand extends Command
      */
     public function handle()
     {
+        /**
+         * Спасаем память
+         * https://github.com/laravel/framework/issues/30012#issuecomment-635943892
+         */
+        DB::connection()->unsetEventDispatcher();
+
         echo "\n";
 
         $dir = $this->getDirectoryIteratorForDate();
@@ -125,20 +132,16 @@ abstract class AbstractGarParserCommand extends Command
             echo sprintf("Найдено %d записей\n", $xml->count());
 
             foreach ($xml->children() as $item) {
-                $this->items[] = $this->parseItem($item);
+                $this->parsedItems[] = $this->parseItem($item);
 
-                if (count($this->items) % $this->commitCount === 0) {
+                if (count($this->parsedItems) % $this->commitCount === 0) {
                     $this->commit();
-
-                    /**
-                     * Чистим массив элементов т.к. memory limit overflow
-                     */
-                    $this->items = [];
                 }
                 
             }
         }
 
+        $this->commit();
 
         echo "\n";
 
@@ -149,11 +152,19 @@ abstract class AbstractGarParserCommand extends Command
      */
     protected function commit()
     {
-        if (property_exists($this, 'parsingClass')) {
-            $this->parsingClass::upsert($this->parsedItems, ['gar_id']);
-        } else {
+        echo memory_get_usage(true) . "\n";
+        if ( !property_exists($this, 'parsingClass') ) {
             throw new \Exception(sprintf("Класс %s не имеет параметра `parsingClass`. Не удалось сохранить изменения.", static::class));
         }
+
+        echo sprintf("Коммитим %s строк\n", count($this->parsedItems));
+        $this->parsingClass::upsert($this->parsedItems, ['gar_id']);
+        
+        /**
+        * Чистим массив элементов т.к. memory limit overflow
+        */
+        $this->parsedItems = [];
+        echo memory_get_usage(true) . "\n";
     }
 
     /**
