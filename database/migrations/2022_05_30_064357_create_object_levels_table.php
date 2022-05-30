@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('object_levels', function (Blueprint $table) {
             $table->id();
 
-            $table->bigInteger('gar_id')->unsigned()->unique()->comment('id из AS_OBJECT_LEVELS');
+            $table->bigInteger('gar_id')->unsigned()->unique()->comment('level из AS_OBJECT_LEVELS');
             $table->string('name')->comment('Название параметра');
             $table->string('short')->nullable()->comment('Краткое название');
             $table->date('update_date')->comment('Дата обновления записи');
