@@ -35,8 +35,8 @@ return new class extends Migration
             /**
              * У последней записи в цепочке is_active = 1, у остальных = 0
              */
-            $table->bigInteger('prev_id')->nullable()->unsigned()->comment('id предыдущей записи об этом доме из AS_HOUSES');
-            $table->bigInteger('next_id')->nullable()->unsigned()->comment('id следующей записи об этом доме из AS_HOUSES');
+            $table->bigInteger('prev_id')->default(0)->unsigned()->comment('id предыдущей записи об этом доме из AS_HOUSES');
+            $table->bigInteger('next_id')->default(0)->unsigned()->comment('id следующей записи об этом доме из AS_HOUSES');
 
             $table->date('update_date')->comment('Дата обновления записи');
             $table->date('start_date')->comment('Дата начала действия записи');

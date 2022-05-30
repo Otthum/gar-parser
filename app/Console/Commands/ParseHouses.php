@@ -48,8 +48,8 @@ class ParseHouses extends AbstractGarParserCommand
 
             'operation_id' => $attributes['OPERTYPEID'],
 
-            'prev_id' => $attributes['PREVID'],
-            'next_id' => $attributes['NEXTID'],
+            'prev_id' => $attributes['PREVID'] ?? 0,
+            'next_id' => $attributes['NEXTID'] ?? 0,
 
             'update_date' => $attributes['UPDATEDATE'],
             'start_date' => $attributes['STARTDATE'],
