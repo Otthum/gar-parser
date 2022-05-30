@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\GarParserService;
 use Illuminate\Console\Command;
 use ZipArchive;
 
@@ -60,9 +61,8 @@ class LoadGarDelta extends Command
                 $formatedDate = $date->format($this->garDateFormat);
                 $local = $this->load($formatedDate);
 
-                $date->sub(new \DateInterval('P1D'));
-
                 if (!$local) {
+                    $date->sub(new \DateInterval('P1D'));
                     echo sprintf("Таймаут...\n\n");
                     sleep($this->timeout);
                 }
@@ -73,12 +73,8 @@ class LoadGarDelta extends Command
             $local = $this->load($formatedDate);
         }
 
-        $zip = new ZipArchive();
-        $zip->open($local);
-
-        $zip->extractTo($this->getFilesDirectoryPath($formatedDate));
-        $zip->close();
-        unlink($local);
+        $this->call('gar:parse:param-types', ['date' => $date->format('c')]);
+        $this->call('gar:parse:house-params', ['date' => $date->format('c')]);
     }
 
     /**
@@ -103,6 +99,13 @@ class LoadGarDelta extends Command
         $local = $this->getFilesDirectoryPath($formatedDate) . "/tmp.zip";
 
         file_put_contents($local, $remote);
+
+        $zip = new ZipArchive();
+        $zip->open($local);
+
+        $zip->extractTo($this->getFilesDirectoryPath($formatedDate));
+        $zip->close();
+        unlink($local);
         
         return $local;
     }
