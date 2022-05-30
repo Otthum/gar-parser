@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('operation_types', function (Blueprint $table) {
             $table->id();
 
-            $table->bigInteger('gar_id')->unsigned()->unique()->comment('level из AS_OBJECT_LEVELS');
+            $table->bigInteger('gar_id')->unsigned()->unique()->comment('id из AS_OPERATION_TYPES');
             $table->string('name')->comment('Название параметра');
             $table->string('short')->nullable()->comment('Краткое название');
             $table->string('desc')->nullable()->comment('Описание');
