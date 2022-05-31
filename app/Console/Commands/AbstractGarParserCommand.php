@@ -128,7 +128,6 @@ abstract class AbstractGarParserCommand extends Command
             echo sprintf("Парсим файл %s\n", $file->getPathname());
 
             $xml = simplexml_load_file($file->getPathname());
-
             echo sprintf("Найдено %d записей\n", $xml->count());
 
             foreach ($xml->children() as $item) {
@@ -152,7 +151,6 @@ abstract class AbstractGarParserCommand extends Command
      */
     protected function commit()
     {
-        echo memory_get_usage(true) . "\n";
         if ( !property_exists($this, 'parsingClass') ) {
             throw new \Exception(sprintf("Класс %s не имеет параметра `parsingClass`. Не удалось сохранить изменения.", static::class));
         }
@@ -164,7 +162,6 @@ abstract class AbstractGarParserCommand extends Command
         * Чистим массив элементов т.к. memory limit overflow
         */
         $this->parsedItems = [];
-        echo memory_get_usage(true) . "\n";
     }
 
     /**
