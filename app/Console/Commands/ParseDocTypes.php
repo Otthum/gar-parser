@@ -12,7 +12,7 @@ class ParseDocTypes extends AbstractGarParserCommand
      *
      * @var string
      */
-    protected $signature = 'gar:parse:doc-types {date : Дата выгрузки}';
+    protected $signature = 'gar:parse:doc-types  {path : Путь до архива с выгрузкой внутри папки "storage/app/gar"}';
 
     /**
      * The console command description.
@@ -24,7 +24,7 @@ class ParseDocTypes extends AbstractGarParserCommand
     /**
      * Шаблон имени файла с данными
      */
-    protected $fileNamePattern = '~AS_NORMATIVE_DOCS_TYPES_.+?\.xml~i';
+    protected $fileNamePattern = 'AS_NORMATIVE_DOCS_TYPES_.+?\.xml';
 
     protected $isSpecificForRegion = false;
 

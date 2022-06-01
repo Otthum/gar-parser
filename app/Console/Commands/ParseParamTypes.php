@@ -13,7 +13,7 @@ class ParseParamTypes extends AbstractGarParserCommand
      *
      * @var string
      */
-    protected $signature = 'gar:parse:param-types {date : Дата выгрузки}';
+    protected $signature = 'gar:parse:param-types {path : Путь до архива с выгрузкой внутри папки "storage/app/gar"}';
 
     /**
      * The console command description.
@@ -25,7 +25,7 @@ class ParseParamTypes extends AbstractGarParserCommand
     /**
      * Шаблон имени файла с данными
      */
-    protected $fileNamePattern = '~AS_PARAM_TYPES_.+?\.xml~i';
+    protected $fileNamePattern = 'AS_PARAM_TYPES_.+?\.xml';
 
     protected $isSpecificForRegion = false;
 

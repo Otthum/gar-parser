@@ -13,7 +13,7 @@ class ParseAddrObjTypes extends AbstractGarParserCommand
      *
      * @var string
      */
-    protected $signature = 'gar:parse:addr-obj-types {date : Дата выгрузки}';
+    protected $signature = 'gar:parse:addr-obj-types  {path : Путь до архива с выгрузкой внутри папки "storage/app/gar"}';
 
     /**
      * The console command description.
@@ -25,7 +25,7 @@ class ParseAddrObjTypes extends AbstractGarParserCommand
     /**
      * Шаблон имени файла с данными
      */
-    protected $fileNamePattern = '~AS_ADDR_OBJ_TYPES_.+?\.xml~i';
+    protected $fileNamePattern = 'AS_ADDR_OBJ_TYPES_.+?\.xml';
 
     protected $isSpecificForRegion = false;
 

@@ -12,7 +12,7 @@ class ParseHouses extends AbstractGarParserCommand
      *
      * @var string
      */
-    protected $signature = 'gar:parse:houses {date : Дата выгрузки} {region=all : Регион для парсинга. Базово парсит все}';
+    protected $signature = 'gar:parse:houses  {path : Путь до архива с выгрузкой внутри папки "storage/app/gar"} {region=all : Регион для парсинга. Базово парсит все}';
 
     /**
      * The console command description.
@@ -24,7 +24,7 @@ class ParseHouses extends AbstractGarParserCommand
     /**
      * Шаблон имени файла с данными
      */
-    protected $fileNamePattern = '~AS_HOUSES_\d+?.+?\.xml~i';
+    protected $fileNamePattern = 'AS_HOUSES_\d+?.+?\.xml';
 
     protected $parsingClass = House::class;
 

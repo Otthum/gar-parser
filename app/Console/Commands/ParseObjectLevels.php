@@ -12,7 +12,7 @@ class ParseObjectLevels extends AbstractGarParserCommand
      *
      * @var string
      */
-    protected $signature = 'gar:parse:object-levels {date : Дата выгрузки}';
+    protected $signature = 'gar:parse:object-levels  {path : Путь до архива с выгрузкой внутри папки "storage/app/gar"}';
 
     /**
      * The console command description.
@@ -24,7 +24,7 @@ class ParseObjectLevels extends AbstractGarParserCommand
     /**
      * Шаблон имени файла с данными
      */
-    protected $fileNamePattern = '~AS_OBJECT_LEVELS_.+?\.xml~i';
+    protected $fileNamePattern = 'AS_OBJECT_LEVELS_.+?\.xml';
 
     protected $isSpecificForRegion = false;
 

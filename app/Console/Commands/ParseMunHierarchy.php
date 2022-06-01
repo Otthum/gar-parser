@@ -12,7 +12,7 @@ class ParseMunHierarchy extends AbstractGarParserCommand
      *
      * @var string
      */
-    protected $signature = 'gar:parse:mun-hierarchy {date : Дата выгрузки} {region=all : Регион для парсинга. Базово парсит все}';
+    protected $signature = 'gar:parse:mun-hierarchy  {path : Путь до архива с выгрузкой внутри папки "storage/app/gar"} {region=all : Регион для парсинга. Базово парсит все}';
 
     /**
      * The console command description.
@@ -24,7 +24,7 @@ class ParseMunHierarchy extends AbstractGarParserCommand
     /**
      * Шаблон имени файла с данными
      */
-    protected $fileNamePattern = '~AS_MUN_HIERARCHY_.+?\.xml~i';
+    protected $fileNamePattern = 'AS_MUN_HIERARCHY_.+?\.xml';
 
     protected $parsingClass = MunHierarchy::class;
 

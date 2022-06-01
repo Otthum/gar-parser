@@ -2,18 +2,13 @@
 
 namespace App\Console\Commands;
 
-use DirectoryIterator;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use SimpleXMLElement;
+use ZipArchive;
 
 abstract class AbstractGarParserCommand extends Command
 {
-    /**
-     * Формат даты в файлах выгрузки
-     */
-    protected $garDateFormat = 'Y.m.d';
-
     /**
      * Нужный файл лежит в папке региона или отдельно?
      */
@@ -22,7 +17,7 @@ abstract class AbstractGarParserCommand extends Command
     /**
      * Массив спаршенных данных
      */
-    protected $parsedItems = [];
+    protected $toCommit = [];
 
     /**
      * Через какое кол-во строк запускать обновление базы
@@ -45,95 +40,29 @@ abstract class AbstractGarParserCommand extends Command
 
         echo "\n";
 
-        $dir = $this->getDirectoryIteratorForDate();
+        $arc = new ZipArchive();
+        $arc->open(storage_path('app/gar/' . $this->argument('path')));
 
-        if (! $this->isSpecificForRegion) {
-            $this->parseDirectory($dir);
-            return true;
-        }
+        for ($i = 0; $i < $arc->count(); $i++) {
+            $file = $arc->getStream($arc->getNameIndex($i));
+            $fileName = stream_get_meta_data($file)['uri'];
 
-        if ($this->argument('region') === 'all') {
-            foreach ($dir as $item) {
-                if ($item->isDot() || $item->isFile()) {
-                    continue;
-                }
-
-                $this->parseDirectory(new DirectoryIterator($item->getRealPath()));
-            }
-
-            return true;
-        }
-
-        try {
-            $this->parseDirectory(new DirectoryIterator($dir->getRealPath() . '/' . $this->argument('region')));
-        } catch (\UnexpectedValueException $e) {
-            echo sprintf(
-                "Ошибка при открытии папки для запрошенной даты (%s) и региона (%s)\n%s\n",
-                $this->argument('date'),
-                $this->argument('region'),
-                $e->getMessage());
-            
-            return false;
-        }
-        
-
-        return true;
-
-    }
-
-    /**
-     * Возвращает папку для запрошенной даты
-     * 
-     * @return DirectoryIterator|false Папка с выгрузкой по запрошенной дате или `false`, если не найдено
-     */
-    protected function getDirectoryIteratorForDate() : DirectoryIterator|false
-    {
-        $date = $this->argument('date');
-
-        $date = new \DateTime($date);
-        $dirPath = str_replace('{date}', $date->format($this->garDateFormat), storage_path('app/gar/{date}'));
-
-        try {
-            $iterator = new DirectoryIterator($dirPath);
-        } catch (\UnexpectedValueException $e) {
-            echo sprintf(
-                "Ошибка при открытии папки для запрошенной даты (%s)\n%s\n",
-                $this->argument('date'),
-                $e->getMessage());
-            return false;
-        }
-
-        return $iterator;
-    }
-
-    /**
-     * Ищет в папке региона соответствующий файл и запускает парсер элемента
-     * на каждую строку в нём
-     * 
-     * @param DirectoryIterator $dir папка с выгрузкой по региону
-     * @return void
-     */
-    protected function parseDirectory(DirectoryIterator $dir): void
-    {
-        /**
-         * @var SplFileInfo $file
-         */
-        foreach ($dir as $file) {
-            preg_match($this->fileNamePattern, $file->getFileName(), $matches);
+            preg_match($this->getFileNamePattern(), $fileName, $matches);
 
             if (!isset($matches[0])) {
                 continue;
             }
 
-            echo sprintf("Парсим файл %s\n", $file->getPathname());
+            echo sprintf("Парсим файл %s\n", $fileName);
 
-            $xml = simplexml_load_file($file->getPathname());
+            $xml = new SimpleXMLElement($arc->getFromIndex($i));
+
             echo sprintf("Найдено %d записей\n", $xml->count());
 
             foreach ($xml->children() as $item) {
-                $this->parsedItems[] = $this->parseItem($item);
+                $this->toCommit[] = $this->parseItem($item);
 
-                if (count($this->parsedItems) % $this->commitCount === 0) {
+                if (count($this->toCommit) % $this->commitCount === 0) {
                     $this->commit();
                 }
                 
@@ -142,7 +71,7 @@ abstract class AbstractGarParserCommand extends Command
 
         $this->commit();
 
-        echo "\n";
+        return true;
 
     }
 
@@ -155,13 +84,32 @@ abstract class AbstractGarParserCommand extends Command
             throw new \Exception(sprintf("Класс %s не имеет параметра `parsingClass`. Не удалось сохранить изменения.", static::class));
         }
 
-        echo sprintf("Коммитим %s строк\n", count($this->parsedItems));
-        $this->parsingClass::upsert($this->parsedItems, ['gar_id']);
+        echo sprintf("Коммитим %s строк\n", count($this->toCommit));
+        $this->parsingClass::upsert($this->toCommit, ['gar_id']);
         
         /**
-        * Чистим массив элементов т.к. memory limit overflow
+        * Чистим массив элементов чтобы не коммитить их заного
+        * и не переполнять память
         */
-        $this->parsedItems = [];
+        $this->toCommit = [];
+    }
+
+    /**
+     * Возвращает регулярку для поиска необходимого файла в архиве.
+     */
+    protected function getFileNamePattern(): string
+    {
+        if ( !$this->isSpecificForRegion ) {
+            return sprintf('~%s~i', $this->fileNamePattern);
+        }
+
+        if ($this->argument('region') == 'all') {
+            $regionPart = '\d{2}/';
+        } else {
+            $regionPart = $this->argument('region') . '/';
+        }
+
+        return sprintf('~%s%s~i', $regionPart, $this->fileNamePattern);
     }
 
     /**

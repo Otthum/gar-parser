@@ -13,7 +13,7 @@ class ParseAppartmentTypes extends AbstractGarParserCommand
      *
      * @var string
      */
-    protected $signature = 'gar:parse:appart-types {date : Дата выгрузки}';
+    protected $signature = 'gar:parse:appart-types  {path : Путь до архива с выгрузкой внутри папки "storage/app/gar"}';
 
     /**
      * The console command description.
@@ -25,7 +25,7 @@ class ParseAppartmentTypes extends AbstractGarParserCommand
     /**
      * Шаблон имени файла с данными
      */
-    protected $fileNamePattern = '~AS_APARTMENT_TYPES_.+?\.xml~i';
+    protected $fileNamePattern = 'AS_APARTMENT_TYPES_.+?\.xml';
 
     protected $isSpecificForRegion = false;
 
