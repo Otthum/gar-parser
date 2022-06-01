@@ -78,22 +78,22 @@ class LoadGarDump extends Command
             $local = $this->load($formatedDate);
         }
 
-        $this->call('gar:parse:param-types', ['date' => $date->format('c')]);
-        $this->call('gar:parse:add-house-types', ['date' => $date->format('c')]);
-        $this->call('gar:parse:addr-obj-types', ['date' => $date->format('c')]);
-        $this->call('gar:parse:appart-types', ['date' => $date->format('c')]);
-        $this->call('gar:parse:object-levels', ['date' => $date->format('c')]);
-        $this->call('gar:parse:operation-types', ['date' => $date->format('c')]);
-        $this->call('gar:parse:room-types', ['date' => $date->format('c')]);
-        $this->call('gar:parse:doc-kinds', ['date' => $date->format('c')]);
-        $this->call('gar:parse:doc-types', ['date' => $date->format('c')]);
-        $this->call('gar:parse:house-types', ['date' => $date->format('c')]);
+        $this->call('gar:parse:param-types', ['path' => $local]);
+        $this->call('gar:parse:add-house-types', ['path' => $local]);
+        $this->call('gar:parse:addr-obj-types', ['path' => $local]);
+        $this->call('gar:parse:appart-types', ['path' => $local]);
+        $this->call('gar:parse:object-levels', ['path' => $local]);
+        $this->call('gar:parse:operation-types', ['path' => $local]);
+        $this->call('gar:parse:room-types', ['path' => $local]);
+        $this->call('gar:parse:doc-kinds', ['path' => $local]);
+        $this->call('gar:parse:doc-types', ['path' => $local]);
+        $this->call('gar:parse:house-types', ['path' => $local]);
         
-        $this->call('gar:parse:houses', ['date' => $date->format('c')]);
-        $this->call('gar:parse:house-params', ['date' => $date->format('c')]);
-        $this->call('gar:parse:add-objects', ['date' => $date->format('c')]);
+        $this->call('gar:parse:houses', ['path' => $local]);
+        $this->call('gar:parse:house-params', ['path' => $local]);
+        $this->call('gar:parse:add-objects', ['path' => $local]);
         
-        $this->call('gar:parse:mun-hierarchy', ['date' => $date->format('c')]);
+        $this->call('gar:parse:mun-hierarchy', ['path' => $local]);
     }
 
     /**
