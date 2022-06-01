@@ -6,14 +6,14 @@ use App\Services\GarParserService;
 use Illuminate\Console\Command;
 use ZipArchive;
 
-class LoadGarDelta extends Command
+class LoadGarDump extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'gar:delta {date=latest : Дата выгрузки. Базово ищет последнюю}';
+    protected $signature = 'gar:load {date=latest : Дата выгрузки. Базово ищет последнюю} {--full}';
 
     /**
      * The console command description.
@@ -25,7 +25,12 @@ class LoadGarDelta extends Command
     /**
      * Шаблон урла для получения файла
      */
-    protected $urlTemplate = 'https://fias-file.nalog.ru/downloads/{date}/gar_delta_xml.zip';
+    protected $urlTemplateDelta = 'https://fias-file.nalog.ru/downloads/{date}/gar_delta_xml.zip';
+
+    /**
+     * Шаблон урла для получения файла
+     */
+    protected $urlTemplateFull = 'https://fias-file.nalog.ru/downloads/{date}/gar_xml.zip';
 
     /**
      * Формат даты для урла
@@ -99,9 +104,13 @@ class LoadGarDelta extends Command
      */
     protected function load(string $formatedDate)
     {
-        $url = str_replace('{date}', $formatedDate, $this->urlTemplate);
+        $urlTemplate = $this->option('full')
+            ? $this->urlTemplateFull
+            : $this->urlTemplateDelta;
         
-        echo sprintf("Чтение выгрузки за %s.\n", $formatedDate);
+        $url = str_replace('{date}', $formatedDate, $urlTemplate);
+        
+        echo sprintf("Чтение выгрузки за %s (%s).\n", $formatedDate, $this->option('full') ? 'Всё' : 'Изменения');
 
         try {
             $remote = fopen($url, 'r');
@@ -110,18 +119,31 @@ class LoadGarDelta extends Command
             return false;
         }
 
-        $local = $this->getFilesDirectoryPath($formatedDate) . "/tmp.zip";
+        $archiveName = "/tmp.zip";
+        $localPath = $this->getFilesDirectoryPath($formatedDate) . $archiveName;
+        $local = fopen($localPath, 'w');
 
-        file_put_contents($local, $remote);
+        $chunksize = (1024 * 1024) * 10; // 10 MB
+        $length = $this->getRemoteFileSize($url);
+        $loaded = 0;
+        while(!feof($remote)) {
+            $buf = '';
+            $buf = fread($remote, $chunksize);
+            $bytes = fwrite($local, $buf);
+            if ($bytes == false) {
+                return false;
+            }
+            $loaded += $bytes;
 
-        $zip = new ZipArchive();
-        $zip->open($local);
+            echo sprintf(
+                "\rЗагружено %f/%f мб (%f%%)",
+                $loaded / 1024 / 1024,
+                $length / 1024 / 1024,
+                $loaded / $length * 100
+            );
+        }
 
-        $zip->extractTo($this->getFilesDirectoryPath($formatedDate));
-        $zip->close();
-        unlink($local);
-        
-        return $local;
+        return $formatedDate . $archiveName;
     }
 
     /**
@@ -134,10 +156,36 @@ class LoadGarDelta extends Command
     {
         $path = str_replace('{date}', $date, storage_path('app/gar/{date}'));
 
+        if ($this->option('full')) {
+            $path .= '_full';
+        }
+
         if (!is_dir($path)) {
             mkdir($path);
         }
 
         return $path;
+    }
+
+    /**
+     * Возвращает размер загружаемого файла в байтах
+     * 
+     * @param string $url   урл до файла
+     * @return float        размер в байтах
+     */
+    protected function getRemoteFileSize(string $url): float
+    {
+        $curl = curl_init( $url );
+
+        curl_setopt( $curl, CURLOPT_NOBODY, true );
+        curl_setopt( $curl, CURLOPT_HEADER, true );
+        curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true );
+        curl_setopt( $curl, CURLOPT_FOLLOWLOCATION, true );
+        curl_setopt( $curl, CURLOPT_SSL_VERIFYHOST, false );
+        curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, false );
+
+        $data = curl_exec( $curl );
+        curl_close( $curl );
+        return curl_getinfo($curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
     }
 }
