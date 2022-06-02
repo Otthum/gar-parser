@@ -29,34 +29,33 @@ class ParseHouses extends AbstractGarParserCommand
     protected $parsingClass = House::class;
 
 
-    protected function parseItem(SimpleXMLElement $item)
+    protected function parseItem($item)
     {
-        $attributes = $item->attributes();
         return [
-            'gar_id' => $attributes['ID'],
-            'object_id' => $attributes['OBJECTID'],
-            'object_guid' => $attributes['OBJECTGUID'],
-            'change_id' => $attributes['CHANGEID'],
+            'gar_id' => $item['ID'],
+            'object_id' => $item['OBJECTID'],
+            'object_guid' => $item['OBJECTGUID'],
+            'change_id' => $item['CHANGEID'],
 
-            'num' => $attributes['HOUSENUM'],
-            'num_1' => $attributes['ADDNUM1'],
-            'num_2' => $attributes['ADDNUM2'],
+            'num' => $item['HOUSENUM'] ?? null,
+            'num_1' => $item['ADDNUM1'] ?? null,
+            'num_2' => $item['ADDNUM2'] ?? null,
 
-            'type_id' => $attributes['HOUSETYPE'],
-            'add_type_id_1' => $attributes['ADDTYPE1'],
-            'add_type_id_2' => $attributes['ADDTYPE2'],
+            'type_id' => $item['HOUSETYPE'] ?? null,
+            'add_type_id_1' => $item['ADDTYPE1'] ?? null,
+            'add_type_id_2' => $item['ADDTYPE2'] ?? null,
 
-            'operation_id' => $attributes['OPERTYPEID'],
+            'operation_id' => $item['OPERTYPEID'],
 
-            'prev_id' => $attributes['PREVID'] ?? 0,
-            'next_id' => $attributes['NEXTID'] ?? 0,
+            'prev_id' => $item['PREVID'] ?? 0,
+            'next_id' => $item['NEXTID'] ?? 0,
 
-            'update_date' => $attributes['UPDATEDATE'],
-            'start_date' => $attributes['STARTDATE'],
-            'end_date' => $attributes['ENDDATE'],
+            'update_date' => $item['UPDATEDATE'],
+            'start_date' => $item['STARTDATE'],
+            'end_date' => $item['ENDDATE'],
 
-            'is_actual' => filter_var($attributes['ISACTUAL'], FILTER_VALIDATE_BOOL),
-            'is_active' => filter_var($attributes['ISACTIVE'], FILTER_VALIDATE_BOOL),
+            'is_actual' => filter_var($item['ISACTUAL'], FILTER_VALIDATE_BOOL),
+            'is_active' => filter_var($item['ISACTIVE'], FILTER_VALIDATE_BOOL),
         ];
     }
 }

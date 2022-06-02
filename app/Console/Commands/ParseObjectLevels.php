@@ -31,17 +31,16 @@ class ParseObjectLevels extends AbstractGarParserCommand
     protected $parsingClass = ObjectLevel::class;
 
 
-    protected function parseItem(SimpleXMLElement $item)
+    protected function parseItem($item)
     {
-        $attributes = $item->attributes();
         return [
-            'gar_id' => $attributes['LEVEL'],
-            'name' => $attributes['NAME'],
-            'short' => $attributes['SHORTNAME'],
-            'update_date' => $attributes['UPDATEDATE'],
-            'start_date' => $attributes['STARTDATE'],
-            'end_date' => $attributes['ENDDATE'],
-            'is_active' => filter_var($attributes['ISACTIVE'], FILTER_VALIDATE_BOOL),
+            'gar_id' => $item['LEVEL'],
+            'name' => $item['NAME'],
+            'short' => $item['SHORTNAME'],
+            'update_date' => $item['UPDATEDATE'],
+            'start_date' => $item['STARTDATE'],
+            'end_date' => $item['ENDDATE'],
+            'is_active' => filter_var($item['ISACTIVE'], FILTER_VALIDATE_BOOL),
         ];
     }
 }

@@ -29,19 +29,18 @@ class ParseHouseParams extends AbstractGarParserCommand
     protected $parsingClass = Param::class;
 
 
-    protected function parseItem(SimpleXMLElement $item)
+    protected function parseItem($item)
     {
-        $attributes = $item->attributes();
         return [
-            'gar_id' => $attributes['ID'],
-            'object_id' => $attributes['OBJECTID'],
-            'change_id' => $attributes['CHANGEID'],
-            'change_end_id' => $attributes['CHANGEIDEND'],
-            'type_id' => $attributes['TYPEID'],
-            'value' => $attributes['VALUE'],
-            'update_date' => $attributes['UPDATEDATE'],
-            'start_date' => $attributes['STARTDATE'],
-            'end_date' => $attributes['ENDDATE'],
+            'gar_id' => $item['ID'],
+            'object_id' => $item['OBJECTID'],
+            'change_id' => $item['CHANGEID'],
+            'change_end_id' => $item['CHANGEIDEND'],
+            'type_id' => $item['TYPEID'],
+            'value' => $item['VALUE'],
+            'update_date' => $item['UPDATEDATE'],
+            'start_date' => $item['STARTDATE'],
+            'end_date' => $item['ENDDATE'],
         ];
     }
 }

@@ -29,23 +29,22 @@ class ParseMunHierarchy extends AbstractGarParserCommand
     protected $parsingClass = MunHierarchy::class;
 
 
-    protected function parseItem(SimpleXMLElement $item)
+    protected function parseItem($item)
     {
-        $attributes = $item->attributes();
         return [
-            'gar_id' => $attributes['ID'],
-            'change_id' => $attributes['CHANGEID'],
+            'gar_id' => $item['ID'],
+            'change_id' => $item['CHANGEID'],
             
-            'object_id' => $attributes['OBJECTID'],
-            'parent_object_id' => $attributes['PARENTOBJID'],
+            'object_id' => $item['OBJECTID'],
+            'parent_object_id' => $item['PARENTOBJID'],
 
-            'oktmo' => $attributes['OKTMO'],
+            'oktmo' => $item['OKTMO'],
 
-            'prev_id' => $attributes['PREVID'] ?? 0,
-            'next_id' => $attributes['NEXTID'] ?? 0,
+            'prev_id' => $item['PREVID'] ?? 0,
+            'next_id' => $item['NEXTID'] ?? 0,
             
-            'path' => $attributes['PATH'],
-            'is_active' => filter_var($attributes['ISACTIVE'], FILTER_VALIDATE_BOOL),
+            'path' => $item['PATH'],
+            'is_active' => filter_var($item['ISACTIVE'], FILTER_VALIDATE_BOOL),
         ];
     }
 }

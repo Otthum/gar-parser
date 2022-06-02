@@ -32,12 +32,11 @@ class ParseDocKinds extends AbstractGarParserCommand
     protected $parsingClass = DocKind::class;
 
 
-    protected function parseItem(SimpleXMLElement $item)
+    protected function parseItem($item)
     {
-        $attributes = $item->attributes();
         return [
-            'gar_id' => $attributes['ID'],
-            'name' => $attributes['NAME'],
+            'gar_id' => $item['ID'],
+            'name' => $item['NAME'],
         ];
     }
 }

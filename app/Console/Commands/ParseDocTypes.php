@@ -31,14 +31,13 @@ class ParseDocTypes extends AbstractGarParserCommand
     protected $parsingClass = DocType::class;
 
 
-    protected function parseItem(SimpleXMLElement $item)
+    protected function parseItem($item)
     {
-        $attributes = $item->attributes();
         return [
-            'gar_id' => $attributes['ID'],
-            'name' => $attributes['NAME'],
-            'start_date' => $attributes['STARTDATE'],
-            'end_date' => $attributes['ENDDATE'],
+            'gar_id' => $item['ID'],
+            'name' => $item['NAME'],
+            'start_date' => $item['STARTDATE'],
+            'end_date' => $item['ENDDATE'],
         ];
     }
 }

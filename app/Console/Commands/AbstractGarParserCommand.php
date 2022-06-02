@@ -24,6 +24,12 @@ abstract class AbstractGarParserCommand extends Command
      */
     protected $commitCount = 2000;
 
+    /**
+     * Сколько всего элементов спарсили
+     */
+    protected $totalItems = 0;
+    protected $currentFileElems = 0;
+
     
     /**
      * Execute the console command.
@@ -53,27 +59,48 @@ abstract class AbstractGarParserCommand extends Command
                 continue;
             }
 
+            $this->currentFileElems = 0;
             echo sprintf("Парсим файл %s\n", $fileName);
 
-            $xml = new SimpleXMLElement($arc->getFromIndex($i));
+            /* $xml = new SimpleXMLElement($arc->getFromIndex($i));
 
-            echo sprintf("Найдено %d записей\n", $xml->count());
+            echo sprintf("Найдено %d записей\n", $xml->count()); */
 
-            foreach ($xml->children() as $item) {
-                $this->toCommit[] = $this->parseItem($item);
+            $parser = xml_parser_create();
+            xml_set_element_handler(
+                $parser,
+                function ($parser, $data, $attribs) {       
+                    if ($attribs == []) {
+                        return false;
+                    }
 
-                if (count($this->toCommit) % $this->commitCount === 0) {
-                    $this->commit();
-                }
-                
+                    $this->toCommit[] = $this->parseItem($attribs);
+                    $this->currentFileElems++;
+
+                    if (count($this->toCommit) % $this->commitCount === 0) {
+                        $this->commit();
+                    }
+
+                    return true;
+                },
+                false
+            );
+
+            while ($data = fread($file, 32768)) {
+                xml_parse($parser, $data);
             }
+            echo sprintf("Парсинг файла завершён, собрано %d строк\n", $this->currentFileElems);
         }
 
         $this->commit();
 
+        echo sprintf("Команда завершена, спаршено %d строк", $this->totalItems);
+
         return true;
 
     }
+
+
 
     /**
      * Записывает изменения в базу одним запросом
@@ -86,6 +113,7 @@ abstract class AbstractGarParserCommand extends Command
 
         echo sprintf("Коммитим %s строк\n", count($this->toCommit));
         $this->parsingClass::upsert($this->toCommit, ['gar_id']);
+        $this->totalItems += count($this->toCommit);
         
         /**
         * Чистим массив элементов чтобы не коммитить их заного
