@@ -15,9 +15,14 @@ abstract class AbstractGarParserCommand extends Command
     protected $isSpecificForRegion = true;
 
     /**
-     * Массив спаршенных данных
+     * Массив данных для обновления/создания
      */
-    protected $toCommit = [];
+    protected $toUpdate = [];
+
+    /**
+     * Массив gar_id, которые стали неактивны
+     */
+    protected $toDelete = [];
 
     /**
      * Через какое кол-во строк запускать обновление базы
@@ -27,7 +32,8 @@ abstract class AbstractGarParserCommand extends Command
     /**
      * Сколько всего элементов спарсили
      */
-    protected $totalItems = 0;
+    protected $totalUpdatedItems = 0;
+    protected $totalDeletedItems = 0;
     protected $currentFileElems = 0;
 
     
@@ -62,10 +68,6 @@ abstract class AbstractGarParserCommand extends Command
             $this->currentFileElems = 0;
             echo sprintf("Парсим файл %s\n", $fileName);
 
-            /* $xml = new SimpleXMLElement($arc->getFromIndex($i));
-
-            echo sprintf("Найдено %d записей\n", $xml->count()); */
-
             $parser = xml_parser_create();
             xml_set_element_handler(
                 $parser,
@@ -80,10 +82,19 @@ abstract class AbstractGarParserCommand extends Command
                         return false;
                     }
 
-                    $this->toCommit[] = $this->parseItem($attribs);
+                    /**
+                     * Если запись актуальна, но более не активна
+                     * То удалим её из базы, вместо обновления
+                     */
+                    if (isset($parsed['is_active']) && !$parsed['is_active']) {
+                        $this->toDelete[] = $parsed['gar_id'];                      
+                    } else {
+                        $this->toUpdate[] = $parsed;
+                    }
+                    
                     $this->currentFileElems++;
 
-                    if (count($this->toCommit) % $this->commitCount === 0) {
+                    if ((count($this->toUpdate) + count($this->toDelete)) % $this->commitCount === 0) {
                         $this->commit();
                     }
 
@@ -100,7 +111,11 @@ abstract class AbstractGarParserCommand extends Command
 
         $this->commit();
 
-        echo sprintf("Команда завершена, спаршено %d строк", $this->totalItems);
+        echo sprintf(
+            "Команда завершена, обновлено %d строк, удалено %d строк\n",
+            $this->totalUpdatedItems,
+            $this->totalDeletedItems
+        );
 
         return true;
 
@@ -117,15 +132,24 @@ abstract class AbstractGarParserCommand extends Command
             throw new \Exception(sprintf("Класс %s не имеет параметра `parsingClass`. Не удалось сохранить изменения.", static::class));
         }
 
-        echo sprintf("Коммитим %s строк\n", count($this->toCommit));
-        $this->parsingClass::upsert($this->toCommit, ['gar_id']);
-        $this->totalItems += count($this->toCommit);
+        echo sprintf(
+            "Коммитим %d строк (обновляем - %d, удаляем - %d)\n",
+            count($this->toUpdate) + count($this->toDelete),
+            count($this->toUpdate),
+            count($this->toDelete)
+        );
+        $this->parsingClass::upsert($this->toUpdate, ['gar_id']);
+        $this->totalUpdatedItems += count($this->toUpdate);
+
+        $this->parsingClass::whereIn('gar_id', $this->toDelete)->delete();
+        $this->totalDeletedItems += count($this->toDelete);
         
         /**
         * Чистим массив элементов чтобы не коммитить их заного
         * и не переполнять память
         */
-        $this->toCommit = [];
+        $this->toUpdate = [];
+        $this->toDelete = [];
     }
 
     /**
@@ -149,9 +173,9 @@ abstract class AbstractGarParserCommand extends Command
     /**
      * Парсит строку в файле с выгрузкой
      * 
-     * @param SimpleXMLElement $item строка с данными в виде xml элемента
+     * @param mixed $item строка с данными в виде массива
      */
-    protected function parseItem(SimpleXMLElement $item)
+    protected function parseItem($item)
     {
         //
     }
