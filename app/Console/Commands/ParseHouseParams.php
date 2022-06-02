@@ -31,16 +31,19 @@ class ParseHouseParams extends AbstractGarParserCommand
 
     protected function parseItem($item)
     {
+        $isActual = false;
+
+        if (isset($item['CHANGEIDEND']) && $item['CHANGEIDEND'] == 0) {
+            $isActual = true;
+        }
+        
         return [
             'gar_id' => $item['ID'],
             'object_id' => $item['OBJECTID'],
-            'change_id' => $item['CHANGEID'],
-            'change_end_id' => $item['CHANGEIDEND'],
             'type_id' => $item['TYPEID'],
             'value' => $item['VALUE'],
-            'update_date' => $item['UPDATEDATE'],
-            'start_date' => $item['STARTDATE'],
-            'end_date' => $item['ENDDATE'],
+            
+            'is_actual' => $isActual
         ];
     }
 }

@@ -20,8 +20,6 @@ return new class extends Migration
             $table->bigInteger('object_id')->unsigned()->comment('id объекта по справочнику ГАР');
             $table->string('object_guid')->comment('guid объекта по справочнику ГАР');
 
-            $table->bigInteger('change_id')->nullable()->unsigned()->comment('id записи изменения из AS_CHANGE_HISTORY');
-
             $table->string('num')->nullable()->comment('Номер дома');
             $table->string('num_1')->nullable()->comment('Доп. номер дома');
             $table->string('num_2')->nullable()->comment('Доп. номер дома 2');
@@ -30,20 +28,25 @@ return new class extends Migration
             $table->bigInteger('add_type_id_1')->nullable()->unsigned()->comment('id типа из AS_ADDHOUSE_TYPES');
             $table->bigInteger('add_type_id_2')->nullable()->unsigned()->comment('id типа из AS_ADDHOUSE_TYPES');
 
-            $table->bigInteger('operation_id')->nullable()->unsigned()->comment('id типа операции из AS_OPERATION_TYPES');
-
             /**
-             * У последней записи в цепочке is_active = 1, у остальных = 0
+             * Не храним эти данные, т.к. они относятся к записи в ГАРе, а не к дому
              */
+            /* $table->bigInteger('change_id')->nullable()->unsigned()->comment('id записи изменения из AS_CHANGE_HISTORY');
+            $table->bigInteger('operation_id')->nullable()->unsigned()->comment('id типа операции из AS_OPERATION_TYPES');
+            
             $table->bigInteger('prev_id')->default(0)->unsigned()->comment('id предыдущей записи об этом доме из AS_HOUSES');
             $table->bigInteger('next_id')->default(0)->unsigned()->comment('id следующей записи об этом доме из AS_HOUSES');
 
             $table->date('update_date')->comment('Дата обновления записи');
             $table->date('start_date')->comment('Дата начала действия записи');
-            $table->date('end_date')->comment('Дата окончания действия записи');
+            $table->date('end_date')->comment('Дата окончания действия записи'); */
 
-            $table->boolean('is_actual')->comment('Действительна ли запись');
-            $table->boolean('is_active')->comment('Действует ли данный объект');
+            /**
+             * Не нужны так как будем хранить только актуальные записи
+             * об активных домах
+             */
+            /* $table->boolean('is_actual')->comment('Действительна ли запись');
+            $table->boolean('is_active')->comment('Действует ли данный объект'); */
 
             $table->timestamps();
         });

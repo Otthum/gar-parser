@@ -19,7 +19,6 @@ return new class extends Migration
             $table->bigInteger('gar_id')->unsigned()->comment('id из AS_MUN_HIERARCHY');
             $table->bigInteger('object_id')->unsigned()->comment('id объекта из справочника ГАР');
             $table->bigInteger('parent_object_id')-> unsigned()->comment('id родительского объекта из справочника ГАР');
-            $table->bigInteger('change_id')->unsigned()->comment('id записи изменения из AS_CHANGE_HISTORY');
 
             /**
              * Вообще в доках указано что оно обязательно но,
@@ -28,14 +27,19 @@ return new class extends Migration
              */
             $table->string('oktmo')->nullable();
 
-            /**
-             * У последней записи в цепочке is_active = 1, у остальных = 0
-             */
-            $table->bigInteger('prev_id')->default(0)->unsigned()->comment('id предыдущей записи об этом доме из AS_MUN_HIERARCHY');
-            $table->bigInteger('next_id')->default(0)->unsigned()->comment('id следующей записи об этом доме из AS_MUN_HIERARCHY');
-
-            $table->boolean('is_active');
             $table->text('path')->comment('Адресный путь до этого объекта');
+
+            /**
+             * Не храним эти данные, т.к. они относятся к записи в ГАРе, а не к элементу иерархии
+             */
+            /* $table->bigInteger('prev_id')->default(0)->unsigned()->comment('id предыдущей записи об этом доме из AS_MUN_HIERARCHY');
+            $table->bigInteger('next_id')->default(0)->unsigned()->comment('id следующей записи об этом доме из AS_MUN_HIERARCHY');
+            $table->bigInteger('change_id')->unsigned()->comment('id записи изменения из AS_CHANGE_HISTORY'); */
+
+            /**
+             * Храним только активные
+             */
+            /* $table->boolean('is_active'); */
 
             $table->timestamps();
         });

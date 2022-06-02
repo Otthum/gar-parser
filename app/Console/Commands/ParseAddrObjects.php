@@ -35,21 +35,11 @@ class ParseAddrObjects extends AbstractGarParserCommand
             'gar_id' => $item['ID'],
             'object_id' => $item['OBJECTID'],
             'object_guid' => $item['OBJECTGUID'],
-            'change_id' => $item['CHANGEID'],
 
             'name' => $item['NAME'],
             'short' => $item['TYPENAME'],
 
             'level' => $item['LEVEL'],
-
-            'operation_id' => $item['OPERTYPEID'],
-
-            'prev_id' => $item['PREVID'] ?? 0,
-            'next_id' => $item['NEXTID'] ?? 0,
-
-            'update_date' => $item['UPDATEDATE'],
-            'start_date' => $item['STARTDATE'],
-            'end_date' => $item['ENDDATE'],
 
             'is_actual' => filter_var($item['ISACTUAL'], FILTER_VALIDATE_BOOL),
             'is_active' => filter_var($item['ISACTIVE'], FILTER_VALIDATE_BOOL),

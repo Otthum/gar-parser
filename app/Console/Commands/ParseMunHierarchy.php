@@ -33,15 +33,11 @@ class ParseMunHierarchy extends AbstractGarParserCommand
     {
         return [
             'gar_id' => $item['ID'],
-            'change_id' => $item['CHANGEID'],
             
             'object_id' => $item['OBJECTID'],
             'parent_object_id' => $item['PARENTOBJID'],
 
             'oktmo' => $item['OKTMO'],
-
-            'prev_id' => $item['PREVID'] ?? 0,
-            'next_id' => $item['NEXTID'] ?? 0,
             
             'path' => $item['PATH'],
             'is_active' => filter_var($item['ISACTIVE'], FILTER_VALIDATE_BOOL),

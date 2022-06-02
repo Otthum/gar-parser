@@ -35,7 +35,6 @@ class ParseHouses extends AbstractGarParserCommand
             'gar_id' => $item['ID'],
             'object_id' => $item['OBJECTID'],
             'object_guid' => $item['OBJECTGUID'],
-            'change_id' => $item['CHANGEID'],
 
             'num' => $item['HOUSENUM'] ?? null,
             'num_1' => $item['ADDNUM1'] ?? null,
@@ -44,15 +43,6 @@ class ParseHouses extends AbstractGarParserCommand
             'type_id' => $item['HOUSETYPE'] ?? null,
             'add_type_id_1' => $item['ADDTYPE1'] ?? null,
             'add_type_id_2' => $item['ADDTYPE2'] ?? null,
-
-            'operation_id' => $item['OPERTYPEID'],
-
-            'prev_id' => $item['PREVID'] ?? 0,
-            'next_id' => $item['NEXTID'] ?? 0,
-
-            'update_date' => $item['UPDATEDATE'],
-            'start_date' => $item['STARTDATE'],
-            'end_date' => $item['ENDDATE'],
 
             'is_actual' => filter_var($item['ISACTUAL'], FILTER_VALIDATE_BOOL),
             'is_active' => filter_var($item['ISACTIVE'], FILTER_VALIDATE_BOOL),
