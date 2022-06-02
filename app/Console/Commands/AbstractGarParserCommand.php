@@ -74,6 +74,12 @@ abstract class AbstractGarParserCommand extends Command
                         return false;
                     }
 
+                    $parsed = $this->parseItem($attribs);
+
+                    if (isset($parsed['is_actual']) && !$parsed['is_actual']) {
+                        return false;
+                    }
+
                     $this->toCommit[] = $this->parseItem($attribs);
                     $this->currentFileElems++;
 
