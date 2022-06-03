@@ -104,9 +104,12 @@ class LoadGarDump extends Command
      */
     protected function load(string $formatedDate)
     {
-        $urlTemplate = $this->option('full')
-            ? $this->urlTemplateFull
-            : $this->urlTemplateDelta;
+        $urlTemplate = $this->urlTemplateDelta;
+        $archiveName = 'arch.zip';
+        if ($this->option('full')) {
+            $urlTemplate = $this->urlTemplateFull;
+            $archiveName = 'arch_full.zip';
+        }
         
         $url = str_replace('{date}', $formatedDate, $urlTemplate);
         
@@ -119,8 +122,7 @@ class LoadGarDump extends Command
             return false;
         }
 
-        $archiveName = "/tmp.zip";
-        $localPath = $this->getFilesDirectoryPath($formatedDate) . $archiveName;
+        $localPath = $this->getFilesDirectoryPath($formatedDate) . '/' . $archiveName;
         $local = fopen($localPath, 'w');
 
         $chunksize = (1024 * 1024) * 10; // 10 MB
@@ -143,7 +145,7 @@ class LoadGarDump extends Command
             );
         }
 
-        return $formatedDate . $archiveName;
+        return $formatedDate . '/' . $archiveName;
     }
 
     /**
@@ -155,10 +157,6 @@ class LoadGarDump extends Command
     protected function getFilesDirectoryPath(string $date): string
     {
         $path = str_replace('{date}', $date, storage_path('app/gar/{date}'));
-
-        if ($this->option('full')) {
-            $path .= '_full';
-        }
 
         if (!is_dir($path)) {
             mkdir($path);
