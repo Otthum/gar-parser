@@ -37,10 +37,7 @@ class ParseObjectLevels extends AbstractGarParserCommand
             'data' => [
                 'gar_id' => $item['LEVEL'],
                 'name' => $item['NAME'],
-                'short' => $item['SHORTNAME'],
-                'update_date' => $item['UPDATEDATE'],
-                'start_date' => $item['STARTDATE'],
-                'end_date' => $item['ENDDATE'],
+                'short' => $item['SHORTNAME'] ?? null,
             ],
             'is_active' => filter_var($item['ISACTIVE'], FILTER_VALIDATE_BOOL),
         ];

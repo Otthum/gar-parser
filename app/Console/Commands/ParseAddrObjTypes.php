@@ -39,11 +39,8 @@ class ParseAddrObjTypes extends AbstractGarParserCommand
                 'gar_id' => $item['ID'],
                 'level' => $item['LEVEL'],
                 'name' => $item['NAME'],
-                'short' => $item['SHORTNAME'],
-                'desc' => $item['DESC'],
-                'update_date' => $item['UPDATEDATE'],
-                'start_date' => $item['STARTDATE'],
-                'end_date' => $item['ENDDATE'],
+                'short' => $item['SHORTNAME'] ?? null,
+                'desc' => $item['DESC'] ?? null,
             ],
             'is_active' => filter_var($item['ISACTIVE'], FILTER_VALIDATE_BOOL),
         ];

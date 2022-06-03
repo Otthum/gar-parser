@@ -18,8 +18,12 @@ return new class extends Migration
             
             $table->bigInteger('gar_id')->unsigned()->unique()->comment('id из AS_NORMATIVE_DOC_TYPES');
             $table->string('name')->comment('Название');
-            $table->date('start_date')->comment('Дата начала действия записи');
-            $table->date('end_date')->comment('Дата окончания действия записи');
+            
+            /**
+             * Не храним эти данные, т.к. они относятся к записи в ГАРе, а не к типу
+             */
+            /* $table->date('start_date')->comment('Дата начала действия записи');
+            $table->date('end_date')->comment('Дата окончания действия записи'); */
 
             $table->timestamps();
         });
