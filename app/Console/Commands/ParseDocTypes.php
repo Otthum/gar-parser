@@ -34,10 +34,12 @@ class ParseDocTypes extends AbstractGarParserCommand
     protected function parseItem($item)
     {
         return [
-            'gar_id' => $item['ID'],
-            'name' => $item['NAME'],
-            'start_date' => $item['STARTDATE'],
-            'end_date' => $item['ENDDATE'],
+            'data' => [
+                'gar_id' => $item['ID'],
+                'name' => $item['NAME'],
+                'start_date' => $item['STARTDATE'],
+                'end_date' => $item['ENDDATE'],
+            ]
         ];
     }
 }

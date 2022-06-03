@@ -38,10 +38,12 @@ class ParseHouseParams extends AbstractGarParserCommand
         }
         
         return [
-            'gar_id' => $item['ID'],
-            'object_id' => $item['OBJECTID'],
-            'type_id' => $item['TYPEID'],
-            'value' => $item['VALUE'],
+            'data' => [
+                'gar_id' => $item['ID'],
+                'object_id' => $item['OBJECTID'],
+                'type_id' => $item['TYPEID'],
+                'value' => $item['VALUE'],
+            ],
             
             'is_actual' => $isActual
         ];

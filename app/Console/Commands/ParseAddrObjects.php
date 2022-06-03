@@ -32,15 +32,16 @@ class ParseAddrObjects extends AbstractGarParserCommand
     protected function parseItem($item)
     {
         return [
-            'gar_id' => $item['ID'],
-            'object_id' => $item['OBJECTID'],
-            'object_guid' => $item['OBJECTGUID'],
+            'data' => [
+                'gar_id' => $item['ID'],
+                'object_id' => $item['OBJECTID'],
+                'object_guid' => $item['OBJECTGUID'],
 
-            'name' => $item['NAME'],
-            'short' => $item['TYPENAME'],
+                'name' => $item['NAME'],
+                'short' => $item['TYPENAME'],
 
-            'level' => $item['LEVEL'],
-
+                'level' => $item['LEVEL'],
+            ],
             'is_actual' => filter_var($item['ISACTUAL'], FILTER_VALIDATE_BOOL),
             'is_active' => filter_var($item['ISACTIVE'], FILTER_VALIDATE_BOOL),
         ];

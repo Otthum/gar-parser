@@ -32,17 +32,19 @@ class ParseHouses extends AbstractGarParserCommand
     protected function parseItem($item)
     {
         return [
-            'gar_id' => $item['ID'],
-            'object_id' => $item['OBJECTID'],
-            'object_guid' => $item['OBJECTGUID'],
+            'data' => [
+                'gar_id' => $item['ID'],
+                'object_id' => $item['OBJECTID'],
+                'object_guid' => $item['OBJECTGUID'],
 
-            'num' => $item['HOUSENUM'] ?? null,
-            'num_1' => $item['ADDNUM1'] ?? null,
-            'num_2' => $item['ADDNUM2'] ?? null,
+                'num' => $item['HOUSENUM'] ?? null,
+                'num_1' => $item['ADDNUM1'] ?? null,
+                'num_2' => $item['ADDNUM2'] ?? null,
 
-            'type_id' => $item['HOUSETYPE'] ?? null,
-            'add_type_id_1' => $item['ADDTYPE1'] ?? null,
-            'add_type_id_2' => $item['ADDTYPE2'] ?? null,
+                'type_id' => $item['HOUSETYPE'] ?? null,
+                'add_type_id_1' => $item['ADDTYPE1'] ?? null,
+                'add_type_id_2' => $item['ADDTYPE2'] ?? null,
+            ],
 
             'is_actual' => filter_var($item['ISACTUAL'], FILTER_VALIDATE_BOOL),
             'is_active' => filter_var($item['ISACTIVE'], FILTER_VALIDATE_BOOL),

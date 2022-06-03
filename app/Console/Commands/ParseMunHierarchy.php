@@ -32,14 +32,13 @@ class ParseMunHierarchy extends AbstractGarParserCommand
     protected function parseItem($item)
     {
         return [
-            'gar_id' => $item['ID'],
-            
-            'object_id' => $item['OBJECTID'],
-            'parent_object_id' => $item['PARENTOBJID'],
-
-            'oktmo' => $item['OKTMO'],
-            
-            'path' => $item['PATH'],
+            'data' => [
+                'gar_id' => $item['ID'],
+                'object_id' => $item['OBJECTID'],
+                'parent_object_id' => $item['PARENTOBJID'],
+                'oktmo' => $item['OKTMO'],
+                'path' => $item['PATH'],
+            ],
             'is_active' => filter_var($item['ISACTIVE'], FILTER_VALIDATE_BOOL),
         ];
     }

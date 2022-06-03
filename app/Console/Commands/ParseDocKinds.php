@@ -35,8 +35,10 @@ class ParseDocKinds extends AbstractGarParserCommand
     protected function parseItem($item)
     {
         return [
-            'gar_id' => $item['ID'],
-            'name' => $item['NAME'],
+            'data' => [
+                'gar_id' => $item['ID'],
+                'name' => $item['NAME'],
+            ]
         ];
     }
 }

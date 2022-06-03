@@ -87,15 +87,9 @@ abstract class AbstractGarParserCommand extends Command
                      * То удалим её из базы, вместо обновления
                      */
                     if (isset($parsed['is_active']) && !$parsed['is_active']) {
-                        $this->toDelete[] = $parsed['gar_id'];                      
+                        $this->toDelete[] = $parsed['data']['gar_id'];                      
                     } else {
-                        /** 
-                         * Так как эти поля используются только для
-                         * проверки актуальности записи, то дальше они не нужны
-                         */
-                        unset($parsed['is_active'], $parsed['is_actual']);
-                        
-                        $this->toUpdate[] = $parsed;
+                        $this->toUpdate[] = $parsed['data'];
                     }
                     
                     $this->currentFileElems++;
