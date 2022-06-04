@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
 
             $table->bigInteger('gar_id')->unsigned()->unique()->comment('id объекта из справочника ГАР');
-            $table->bigInteger('parent_gar_id')-> unsigned()->comment('id родительского объекта из справочника ГАР');
+            $table->bigInteger('parent_gar_id')->unsigned()->nullable()->comment('id родительского объекта из справочника ГАР');
 
             /**
              * Вообще в доках указано что оно обязательно но,
@@ -28,7 +28,7 @@ return new class extends Migration
 
             $table->text('path')->comment('Адресный путь до этого объекта');
 
-            $table->text('address_str')->comment('Полная строка адреса для данного объекта');
+            $table->text('address_str')->nullable()->comment('Полная строка адреса для данного объекта');
             $table->fullText('address_str');
 
             /**

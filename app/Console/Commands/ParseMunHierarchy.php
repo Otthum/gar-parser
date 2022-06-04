@@ -34,7 +34,7 @@ class ParseMunHierarchy extends AbstractGarParserCommand
         return [
             'data' => [
                 'gar_id' => $item['OBJECTID'],
-                'parent_gar_id' => $item['PARENTOBJID'],
+                'parent_gar_id' => $item['PARENTOBJID'] ?? null,
                 'oktmo' => $item['OKTMO'],
                 'path' => $item['PATH'],
             ],
