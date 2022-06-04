@@ -28,6 +28,9 @@ return new class extends Migration
 
             $table->text('path')->comment('Адресный путь до этого объекта');
 
+            $table->text('address_str')->comment('Полная строка адреса для данного объекта');
+            $table->fullText('address_str');
+
             /**
              * Не храним эти данные, т.к. они относятся к записи в ГАРе, а не к элементу иерархии
              */
