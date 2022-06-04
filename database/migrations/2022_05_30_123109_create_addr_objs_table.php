@@ -16,9 +16,8 @@ return new class extends Migration
         Schema::create('addr_objs', function (Blueprint $table) {
             $table->id();
 
-            $table->bigInteger('gar_id')->unsigned()->unique()->comment('id из AS_ADD_OBJ');
-            $table->bigInteger('object_id')->unsigned()->comment('id объекта по справочнику ГАР');
-            $table->string('object_guid')->comment('guid объекта по справочнику ГАР');
+            $table->bigInteger('gar_id')->unsigned()->unique()->comment('id объекта по справочнику ГАР');
+            $table->string('gar_guid')->comment('guid объекта по справочнику ГАР');
 
             $table->string('name')->comment('Наименование');
             $table->string('short')->comment('Краткое наименование');
@@ -28,7 +27,7 @@ return new class extends Migration
             /**
              * Не храним эти данные, т.к. они относятся к записи в ГАРе, а не к адресному объекту
              */
-            /* 
+            /*
             $table->bigInteger('change_id')->nullable()->unsigned()->comment('id записи изменения из AS_CHANGE_HISTORY');
             $table->bigInteger('operation_id')->nullable()->unsigned()->comment('id типа операции из AS_OPERATION_TYPES');
 

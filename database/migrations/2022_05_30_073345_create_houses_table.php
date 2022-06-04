@@ -16,9 +16,8 @@ return new class extends Migration
         Schema::create('houses', function (Blueprint $table) {
             $table->id();
 
-            $table->bigInteger('gar_id')->unsigned()->unique()->comment('id из AS_HOUSES');
-            $table->bigInteger('object_id')->unsigned()->comment('id объекта по справочнику ГАР');
-            $table->string('object_guid')->comment('guid объекта по справочнику ГАР');
+            $table->bigInteger('gar_id')->unsigned()->unique()->comment('id объекта по справочнику ГАР');
+            $table->string('gar_guid')->comment('guid объекта по справочнику ГАР');
 
             $table->string('num')->nullable()->comment('Номер дома');
             $table->string('num_1')->nullable()->comment('Доп. номер дома');
@@ -31,7 +30,8 @@ return new class extends Migration
             /**
              * Не храним эти данные, т.к. они относятся к записи в ГАРе, а не к дому
              */
-            /* $table->bigInteger('change_id')->nullable()->unsigned()->comment('id записи изменения из AS_CHANGE_HISTORY');
+            /*
+            $table->bigInteger('change_id')->nullable()->unsigned()->comment('id записи изменения из AS_CHANGE_HISTORY');
             $table->bigInteger('operation_id')->nullable()->unsigned()->comment('id типа операции из AS_OPERATION_TYPES');
             
             $table->bigInteger('prev_id')->default(0)->unsigned()->comment('id предыдущей записи об этом доме из AS_HOUSES');

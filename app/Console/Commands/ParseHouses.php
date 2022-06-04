@@ -33,9 +33,8 @@ class ParseHouses extends AbstractGarParserCommand
     {
         return [
             'data' => [
-                'gar_id' => $item['ID'],
-                'object_id' => $item['OBJECTID'],
-                'object_guid' => $item['OBJECTGUID'],
+                'gar_id' => $item['OBJECTID'],
+                'gar_guid' => $item['OBJECTGUID'],
 
                 'num' => $item['HOUSENUM'] ?? null,
                 'num_1' => $item['ADDNUM1'] ?? null,

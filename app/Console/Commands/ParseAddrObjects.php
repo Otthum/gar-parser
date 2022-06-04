@@ -33,9 +33,8 @@ class ParseAddrObjects extends AbstractGarParserCommand
     {
         return [
             'data' => [
-                'gar_id' => $item['ID'],
-                'object_id' => $item['OBJECTID'],
-                'object_guid' => $item['OBJECTGUID'],
+                'gar_id' => $item['OBJECTID'],
+                'gar_guid' => $item['OBJECTGUID'],
 
                 'name' => $item['NAME'],
                 'short' => $item['TYPENAME'],

@@ -16,9 +16,8 @@ return new class extends Migration
         Schema::create('mun_hierarchies', function (Blueprint $table) {
             $table->id();
 
-            $table->bigInteger('gar_id')->unsigned()->comment('id из AS_MUN_HIERARCHY');
-            $table->bigInteger('object_id')->unsigned()->comment('id объекта из справочника ГАР');
-            $table->bigInteger('parent_object_id')-> unsigned()->comment('id родительского объекта из справочника ГАР');
+            $table->bigInteger('gar_id')->unsigned()->unique()->comment('id объекта из справочника ГАР');
+            $table->bigInteger('parent_gar_id')-> unsigned()->comment('id родительского объекта из справочника ГАР');
 
             /**
              * Вообще в доках указано что оно обязательно но,
@@ -32,7 +31,9 @@ return new class extends Migration
             /**
              * Не храним эти данные, т.к. они относятся к записи в ГАРе, а не к элементу иерархии
              */
-            /* $table->bigInteger('prev_id')->default(0)->unsigned()->comment('id предыдущей записи об этом доме из AS_MUN_HIERARCHY');
+            /* 
+            $table->bigInteger('gar_id')->unsigned()->comment('id из AS_MUN_HIERARCHY');
+            $table->bigInteger('prev_id')->default(0)->unsigned()->comment('id предыдущей записи об этом доме из AS_MUN_HIERARCHY');
             $table->bigInteger('next_id')->default(0)->unsigned()->comment('id следующей записи об этом доме из AS_MUN_HIERARCHY');
             $table->bigInteger('change_id')->unsigned()->comment('id записи изменения из AS_CHANGE_HISTORY'); */
 
