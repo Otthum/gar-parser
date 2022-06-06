@@ -37,8 +37,8 @@ class ParseMunHierarchy extends AbstractGarParserCommand
                 'parent_gar_id' => $item['PARENTOBJID'] ?? null,
                 'oktmo' => $item['OKTMO'],
                 'path' => $item['PATH'],
+                'is_active' => filter_var($item['ISACTIVE'], FILTER_VALIDATE_BOOL),
             ],
-            'is_active' => filter_var($item['ISACTIVE'], FILTER_VALIDATE_BOOL),
         ];
     }
 }

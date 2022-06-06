@@ -43,10 +43,10 @@ class ParseHouses extends AbstractGarParserCommand
                 'type_id' => $item['HOUSETYPE'] ?? null,
                 'add_type_id_1' => $item['ADDTYPE1'] ?? null,
                 'add_type_id_2' => $item['ADDTYPE2'] ?? null,
+                'is_active' => filter_var($item['ISACTIVE'], FILTER_VALIDATE_BOOL),
             ],
 
             'is_actual' => filter_var($item['ISACTUAL'], FILTER_VALIDATE_BOOL),
-            'is_active' => filter_var($item['ISACTIVE'], FILTER_VALIDATE_BOOL),
         ];
     }
 }

@@ -43,10 +43,9 @@ return new class extends Migration
 
             /**
              * Не нужны так как будем хранить только актуальные записи
-             * об активных домах
              */
-            /* $table->boolean('is_actual')->comment('Действительна ли запись');
-            $table->boolean('is_active')->comment('Действует ли данный объект'); */
+            /* $table->boolean('is_actual')->comment('Действительна ли запись'); */
+            $table->boolean('is_active')->comment('Действует ли данный объект');
 
             $table->timestamps();
         });

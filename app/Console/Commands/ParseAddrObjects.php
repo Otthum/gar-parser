@@ -40,9 +40,9 @@ class ParseAddrObjects extends AbstractGarParserCommand
                 'short' => $item['TYPENAME'],
 
                 'level' => $item['LEVEL'],
+                'is_active' => filter_var($item['ISACTIVE'], FILTER_VALIDATE_BOOL),
             ],
             'is_actual' => filter_var($item['ISACTUAL'], FILTER_VALIDATE_BOOL),
-            'is_active' => filter_var($item['ISACTIVE'], FILTER_VALIDATE_BOOL),
         ];
     }
 }

@@ -40,10 +40,7 @@ return new class extends Migration
             $table->bigInteger('next_id')->default(0)->unsigned()->comment('id следующей записи об этом доме из AS_MUN_HIERARCHY');
             $table->bigInteger('change_id')->unsigned()->comment('id записи изменения из AS_CHANGE_HISTORY'); */
 
-            /**
-             * Храним только активные
-             */
-            /* $table->boolean('is_active'); */
+            $table->boolean('is_active');
 
             $table->timestamps();
         });
