@@ -20,11 +20,6 @@ abstract class AbstractGarParserCommand extends Command
     protected $toUpdate = [];
 
     /**
-     * Массив gar_id, которые стали неактивны
-     */
-    protected $toDelete = [];
-
-    /**
      * Через какое кол-во строк запускать обновление базы
      */
     protected $commitCount = 2000;
@@ -33,7 +28,6 @@ abstract class AbstractGarParserCommand extends Command
      * Сколько всего элементов спарсили
      */
     protected $totalUpdatedItems = 0;
-    protected $totalDeletedItems = 0;
     protected $currentFileElems = 0;
 
     
@@ -81,20 +75,11 @@ abstract class AbstractGarParserCommand extends Command
                     if (isset($parsed['is_actual']) && !$parsed['is_actual']) {
                         return false;
                     }
-
-                    /**
-                     * Если запись актуальна, но более не активна
-                     * То удалим её из базы, вместо обновления
-                     */
-                    if (isset($parsed['is_active']) && !$parsed['is_active']) {
-                        $this->toDelete[] = $parsed['data']['gar_id'];                      
-                    } else {
-                        $this->toUpdate[] = $parsed['data'];
-                    }
                     
+                    $this->toUpdate[] = $parsed['data'];
                     $this->currentFileElems++;
 
-                    if ((count($this->toUpdate) + count($this->toDelete)) % $this->commitCount === 0) {
+                    if (count($this->toUpdate) % $this->commitCount === 0) {
                         $this->commit();
                     }
 
@@ -112,9 +97,8 @@ abstract class AbstractGarParserCommand extends Command
         $this->commit();
 
         echo sprintf(
-            "Команда завершена, обновлено %d строк, удалено %d строк\n",
+            "Команда завершена, обновлено %d строк\n",
             $this->totalUpdatedItems,
-            $this->totalDeletedItems
         );
 
         return true;
@@ -133,23 +117,17 @@ abstract class AbstractGarParserCommand extends Command
         }
 
         echo sprintf(
-            "Коммитим %d строк (обновляем - %d, удаляем - %d)\n",
-            count($this->toUpdate) + count($this->toDelete),
+            "Коммитим %d строк\n",
             count($this->toUpdate),
-            count($this->toDelete)
         );
         $this->parsingClass::upsert($this->toUpdate, ['gar_id']);
         $this->totalUpdatedItems += count($this->toUpdate);
-
-        $this->parsingClass::whereIn('gar_id', $this->toDelete)->delete();
-        $this->totalDeletedItems += count($this->toDelete);
         
         /**
         * Чистим массив элементов чтобы не коммитить их заного
         * и не переполнять память
         */
         $this->toUpdate = [];
-        $this->toDelete = [];
     }
 
     /**

@@ -40,8 +40,8 @@ class ParseRoomTypes extends AbstractGarParserCommand
                 'name' => $item['NAME'],
                 'short' => $item['SHORTNAME'] ?? null,
                 'desc' => $item['DESC'] ?? null,
+                'is_active' => filter_var($item['ISACTIVE'], FILTER_VALIDATE_BOOL),
             ],
-            'is_active' => filter_var($item['ISACTIVE'], FILTER_VALIDATE_BOOL),
         ];
     }
 }

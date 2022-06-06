@@ -29,10 +29,7 @@ return new class extends Migration
             $table->date('start_date')->comment('Дата начала действия записи');
             $table->date('end_date')->comment('Дата окончания действия записи'); */
             
-            /**
-             * Храним только активные
-             */
-            /* $table->boolean('is_active'); */
+            $table->boolean('is_active');
             $table->timestamps();
         });
     }
