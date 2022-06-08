@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\AddrObj;
 use App\Models\House;
+use App\Models\MunHierarchy;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -32,6 +33,8 @@ class UpdateAddressStr extends Command
      * Текущий оффсет
      */
     protected $offset = 0;
+
+    protected $toCommit = [];
 
 
     /**
@@ -75,7 +78,6 @@ class UpdateAddressStr extends Command
 
                 $this->offset += $this->limit;
 
-                DB::beginTransaction();
                 foreach ($objects as $object) {
 
                     try {
@@ -119,14 +121,32 @@ class UpdateAddressStr extends Command
                     }
                     $str .= $object->getSelfAddress();
 
-                    $object->munHierarchy->address_str = $str;
-                    $object->munHierarchy->save();
-                    $object->update(['updated_at' => new \DateTime()]);
+                    $munHierarchy = $object->munHierarchy->toArray();
+                    unset(
+                        $munHierarchy['created_at'],
+                        $munHierarchy['updated_at'],
+                    );
+
+                    $munHierarchy['address_str'] = $str;
+                    $this->toCommit[] = $munHierarchy;
+                    
                     $count++;
                 }
-                DB::commit();
+
+                $this->commit($class);
                 echo sprintf("\rОбновлено %d записей (последняя - %d, времени прошло %fс)", $count, $object->gar_id, microtime(true) - $start);
             }
         }
+    }
+
+    
+    protected function commit(string $class)
+    {
+        MunHierarchy::upsert($this->toCommit, ['gar_id']);
+
+        $ids = array_column($this->toCommit, 'gar_id');
+        $class::whereIn('gar_id', $ids)->update(['updated_at' => new \DateTime()]);
+        
+        $this->toCommit = [];
     }
 }
