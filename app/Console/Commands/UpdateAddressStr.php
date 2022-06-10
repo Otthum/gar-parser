@@ -15,7 +15,7 @@ class UpdateAddressStr extends Command
      *
      * @var string
      */
-    protected $signature = 'gar:address-str {date=today : Дата обновления адресных объектов, от которой пересчитать строку адреса}';
+    protected $signature = 'gar:address-str {date=today : Дата обновления адресных объектов, от которой пересчитать строку адреса} {--all}';
 
     /**
      * The console command description.
@@ -25,16 +25,19 @@ class UpdateAddressStr extends Command
     protected $description = 'Обновляет address_str колонку в иерархии';
 
     /**
-     * Сколько записей берём за раз
+     * Сколько записей брать за раз
      */
     protected $limit = 500;
 
     /**
-     * Текущий оффсет
+     * Обработанные данные, которые будут занесены в базу
      */
-    protected $offset = 0;
+    protected array $toCommit = [
+        'objects' => [],
+        'hierarchies' => []
+    ];
 
-    protected $toCommit = [];
+    protected int $total = 0;
 
 
     /**
@@ -44,7 +47,11 @@ class UpdateAddressStr extends Command
      */
     public function handle()
     {
-        $date = new \DateTime($this->argument('date'));
+        $start = microtime(true);
+
+        DB::connection()->unsetEventDispatcher();
+        $dateFrom = new \DateTime($this->argument('date'));
+        $dateTo = new \DateTime();
 
         $classes = [
             House::class => [
@@ -59,61 +66,39 @@ class UpdateAddressStr extends Command
             ],
         ];
 
-        $count = 0;
-        $start = microtime(true);
         foreach ($classes as $class => $relations) {
 
-            $this->offset = 0;
+            $q = $class::where('is_active', true)
+                ->where('updated_at', '<=', $dateTo->format('Y-m-d H:i:s'))
+                ->limit($this->limit)
+                ->with($relations)
+                ->orderBy('id', 'asc');
+
+            if (!$this->option('all')) {
+                $q->where('updated_at', '>=', $dateFrom->format('Y-m-d H:i:s'));
+            }
+
             while (true) {
-                $objects = $class::where('updated_at', '>=', $date->format('Y-m-d H:i:s'))
-                    ->where('is_active', true)
-                    ->with($relations)
-                    ->limit($this->limit)
-                    ->offset($this->offset)
-                    ->get();
+                $singleIterationTime = microtime(true);
+
+                $objects = $q->get();
 
                 if ($objects->count() == 0) {
                     break;
                 }
 
-                $this->offset += $this->limit;
+                $parents = $this->collectParents($objects);
 
                 foreach ($objects as $object) {
+                    $this->toCommit['objects'][] = $object->id;
+                    $currentParentIds = $this->explodeObjectPath($object);
 
-                    try {
-                        $parentIds = explode('.', $object->munHierarchy->path);
-                    } catch (\Throwable $e) {
-                        echo sprintf(
-                            "\nОбъект класса %s (garId - %d) не имеет записи в иерархии",
-                            $class,
-                            $object->gar_id
-                        );
+                    if ( !$currentParentIds ) {
                         continue;
                     }
 
-                    $parentModels = AddrObj::whereIn('gar_id', $parentIds)
-                        ->where('gar_id', '!=', $object->gar_id)
-                        ->with('type')
-                        ->get();
-
-                    /**
-                     * Создаём ассоциативный массив id => model
-                     * для того, чтобы в дальнейшем гарантировать
-                     * правильный порядок элементов
-                     */
-                    $parents = [];
-                    foreach ($parentModels as $parent) {
-                        $parents[$parent->gar_id] = $parent;
-                    }
-
-                    /**
-                     * Так как $parentIds изначально идут в том
-                     * порядке, который нам нужен, мы можем пройти
-                     * по нему и брать соответствующую модель
-                     * из заранее подготовленного массива
-                     */
                     $str = '';
-                    foreach ($parentIds as $id) {
+                    foreach ($currentParentIds as $id) {
                         if ($id == $object->gar_id) {
                             continue;
                         }
@@ -128,25 +113,79 @@ class UpdateAddressStr extends Command
                     );
 
                     $munHierarchy['address_str'] = $str;
-                    $this->toCommit[] = $munHierarchy;
-                    
-                    $count++;
+                    $this->total++;
+                    $this->toCommit['hierarchies'][] = $munHierarchy;
                 }
 
-                $this->commit($class);
-                echo sprintf("\rОбновлено %d записей (последняя - %d, времени прошло %fс)", $count, $object->gar_id, microtime(true) - $start);
+                MunHierarchy::upsert($this->toCommit['hierarchies'], ['gar_id']);
+
+                $class::whereIn('id', $this->toCommit['objects'])->update(['updated_at' => (new \DateTime())->format('Y-m-d H:i:s')]);
+
+                echo sprintf(
+                    "\rОбновлено %d адресов за %f секунд (итерация завершена за %f, обновлено %d иерархий и %d объектов, уникальных родителей в итерации - %d)",
+                    $this->total,
+                    microtime(true) - $start,
+                    microtime(true) - $singleIterationTime,
+                    count($this->toCommit['hierarchies']),
+                    count($this->toCommit['objects']),
+                    count($parents)
+                );
+                $this->toCommit = [
+                    'objects' => [],
+                    'hierarchies' => []
+                ];
             }
+
+            echo sprintf("\nКласс %s - done.\n", $class);
         }
     }
 
-    
-    protected function commit(string $class)
+    /**
+     * Разбивает иерархиую объекта на массив из соответсвующих ID
+     */
+    protected function explodeObjectPath($object)
     {
-        MunHierarchy::upsert($this->toCommit, ['gar_id']);
+        try {
+            $ids = explode('.', $object->munHierarchy->path);
+        } catch (\Throwable $e) {
+            echo sprintf(
+                "Объект класса %s (garId - %d) не имеет записи в иерархии\n",
+                get_class($object),
+                $object->gar_id
+            );
+            return false;
+        }
 
-        $ids = array_column($this->toCommit, 'gar_id');
-        $class::whereIn('gar_id', $ids)->update(['updated_at' => new \DateTime()]);
-        
-        $this->toCommit = [];
+        return $ids;
+    }
+
+    /**
+     * Возвращает массив уникальных родителей со всех переданных объектов
+     */
+    protected function collectParents($objects)
+    {
+        /**
+         * Пройдем по всем объектам и собёрм ID всех возможных родителей
+         */
+        $parentByIds = [];
+        foreach ($objects as $object) {
+            if ($currentParentIds = $this->explodeObjectPath($object)) {
+                foreach ($currentParentIds as $id) {
+                    if ($object->gar_id != $id) {
+                        $parentByIds[$id] = null;
+                    }
+                }
+            }
+        }
+
+        /**
+         * Получаем всех родителей и записываем их к соответствующему ID в массиве
+         */
+        $parentModels = AddrObj::whereIn('gar_id', array_keys($parentByIds))->get();
+        foreach ($parentModels as $parentModel) {
+            $parentByIds[$parentModel->gar_id] = $parentModel;
+        }
+
+        return $parentByIds;
     }
 }
