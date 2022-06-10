@@ -25,6 +25,12 @@ abstract class AbstractGarParserCommand extends Command
     protected $commitCount = 2000;
 
     /**
+     * Поля по которым определяется уникальная запись
+     * для сохранения текущей операции парсинга
+     */
+    protected $uniqeFields = ['gar_id'];
+
+    /**
      * Сколько всего элементов спарсили
      */
     protected $totalUpdatedItems = 0;
@@ -121,7 +127,7 @@ abstract class AbstractGarParserCommand extends Command
             count($this->toUpdate),
             $this->currentFileElems
         );
-        $this->parsingClass::upsert($this->toUpdate, ['gar_id']);
+        $this->parsingClass::upsert($this->toUpdate, $this->uniqeFields);
         $this->totalUpdatedItems += count($this->toUpdate);
         
         /**

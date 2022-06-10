@@ -25,6 +25,8 @@ class ParseAddrObjectParams extends AbstractGarParserCommand
      */
     protected $fileNamePattern = 'AS_ADDR_OBJ_PARAMS_.+?\.xml';
 
+    protected $uniqueFields = ['gar_id', 'type_id'];
+
     protected $parsingClass = Param::class;
 
 

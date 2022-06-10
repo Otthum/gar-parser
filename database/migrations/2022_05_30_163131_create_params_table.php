@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('params', function (Blueprint $table) {
             $table->id();
 
-            $table->bigInteger('gar_id')->unsigned()->unique()->comment('id объекта из справочника ГАР к которому относится параметр');
+            $table->bigInteger('gar_id')->unsigned()->comment('id объекта из справочника ГАР к которому относится параметр');
             
             $table->bigInteger('type_id')->unsigned()->comment('id типа из AS_PARAM_TYPES');
             $table->text('value')->comment('Значение параметра');
@@ -36,6 +36,9 @@ return new class extends Migration
             /* $table->bigInteger('change_end_id')->unsigned()->comment('id записи изменения, которая отклонила это изменение')->default(0); */
 
             $table->timestamps();
+
+            $table->unique(['gar_id', 'type_id']);
+            $table->index('gar_id');
         });
     }
 

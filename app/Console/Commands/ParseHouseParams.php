@@ -26,6 +26,8 @@ class ParseHouseParams extends AbstractGarParserCommand
      */
     protected $fileNamePattern = 'AS_HOUSES_PARAMS_.+?\.xml';
 
+    protected $uniqueFields = ['gar_id', 'type_id'];
+
     protected $parsingClass = Param::class;
 
 
