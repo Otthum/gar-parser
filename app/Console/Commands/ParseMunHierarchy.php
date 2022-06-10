@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Models\MunHierarchy;
-use SimpleXMLElement;
 
 class ParseMunHierarchy extends AbstractGarParserCommand
 {
@@ -31,6 +30,11 @@ class ParseMunHierarchy extends AbstractGarParserCommand
 
     protected function parseItem($item)
     {
+        $isActual = true;
+        if (isset($item['NEXTID']) && $item['NEXTID'] != 0) {
+            $isActual = false;
+        }
+
         return [
             'data' => [
                 'gar_id' => $item['OBJECTID'],
@@ -39,6 +43,8 @@ class ParseMunHierarchy extends AbstractGarParserCommand
                 'path' => $item['PATH'],
                 'is_active' => filter_var($item['ISACTIVE'], FILTER_VALIDATE_BOOL),
             ],
+
+            'is_actual' => $isActual
         ];
     }
 }
