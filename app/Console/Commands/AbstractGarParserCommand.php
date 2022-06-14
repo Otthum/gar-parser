@@ -25,6 +25,12 @@ abstract class AbstractGarParserCommand extends Command
     protected $commitCount = 2000;
 
     /**
+     * Поля по которым определяется уникальная запись
+     * для сохранения текущей операции парсинга
+     */
+    protected $uniqeFields = ['gar_id'];
+
+    /**
      * Сколько всего элементов спарсили
      */
     protected $totalUpdatedItems = 0;
@@ -91,13 +97,13 @@ abstract class AbstractGarParserCommand extends Command
             while ($data = fread($file, 32768)) {
                 xml_parse($parser, $data);
             }
-            echo sprintf("Парсинг файла завершён, собрано %d строк\n", $this->currentFileElems);
+            echo sprintf("\nПарсинг файла завершён, собрано %d строк\n", $this->currentFileElems);
         }
 
         $this->commit();
 
         echo sprintf(
-            "Команда завершена, обновлено %d строк\n",
+            "\nКоманда завершена, обновлено %d строк\n",
             $this->totalUpdatedItems,
         );
 
@@ -117,10 +123,11 @@ abstract class AbstractGarParserCommand extends Command
         }
 
         echo sprintf(
-            "Коммитим %d строк\n",
+            "\rКоммитим %d строк (всего с этого файла закомиченно %d строк)\n",
             count($this->toUpdate),
+            $this->currentFileElems
         );
-        $this->parsingClass::upsert($this->toUpdate, ['gar_id']);
+        $this->parsingClass::upsert($this->toUpdate, $this->uniqeFields);
         $this->totalUpdatedItems += count($this->toUpdate);
         
         /**

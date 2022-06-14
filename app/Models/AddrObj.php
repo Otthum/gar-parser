@@ -27,6 +27,6 @@ class AddrObj extends Model
 
     public function type()
     {
-        return $this->belongsTo(HouseType::class, 'type_id', 'gar_id');
+        return $this->belongsTo(AddrObjType::class, 'type_id', 'gar_id');
     }
 }

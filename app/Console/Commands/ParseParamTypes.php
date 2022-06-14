@@ -38,8 +38,8 @@ class ParseParamTypes extends AbstractGarParserCommand
             'data' => [
                 'gar_id' => $item['ID'],
                 'name' => $item['NAME'],
-                'code' => $item['DESC'] ?? null,
-                'desc' => $item['CODE'],
+                'code' => $item['CODE'],
+                'desc' => $item['DESC'] ?? null,
                 'is_active' => filter_var($item['ISACTIVE'], FILTER_VALIDATE_BOOL),
             ],
         ];

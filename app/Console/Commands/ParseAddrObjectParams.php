@@ -3,28 +3,27 @@
 namespace App\Console\Commands;
 
 use App\Models\Param;
-use SimpleXMLElement;
 
-class ParseHouseParams extends AbstractGarParserCommand
+class ParseAddrObjectParams extends AbstractGarParserCommand
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'gar:parse:house-params  {path : Путь до архива с выгрузкой внутри папки "storage/app/gar"} {region=all : Регион для парсинга. Базово парсит все}';
+    protected $signature = 'gar:parse:addr-obj-params  {path : Путь до архива с выгрузкой внутри папки "storage/app/gar"} {region=all : Регион для парсинга. Базово парсит все}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Парсит параметры домов за указанную дату';
+    protected $description = 'Парсит параметры адресных объектов за указанную дату';
 
     /**
      * Шаблон имени файла с данными
      */
-    protected $fileNamePattern = 'AS_HOUSES_PARAMS_.+?\.xml';
+    protected $fileNamePattern = 'AS_ADDR_OBJ_PARAMS_.+?\.xml';
 
     protected $uniqueFields = ['gar_id', 'type_id'];
 

@@ -78,6 +78,8 @@ class LoadGarDump extends Command
             $local = $this->load($formatedDate);
         }
 
+        $start = new \DateTime();
+
         $this->call('gar:parse:param-types', ['path' => $local]);
         $this->call('gar:parse:add-house-types', ['path' => $local]);
         $this->call('gar:parse:addr-obj-types', ['path' => $local]);
@@ -94,6 +96,8 @@ class LoadGarDump extends Command
         $this->call('gar:parse:add-objects', ['path' => $local]);
         
         $this->call('gar:parse:mun-hierarchy', ['path' => $local]);
+
+        $this->call('gar:address-str', ['date' => $start->format('c')]);
     }
 
     /**
@@ -132,9 +136,11 @@ class LoadGarDump extends Command
             $buf = '';
             $buf = fread($remote, $chunksize);
             $bytes = fwrite($local, $buf);
-            if ($bytes == false) {
+
+            /* if ($bytes == false) {
                 return false;
-            }
+            } */
+
             $loaded += $bytes;
 
             echo sprintf(
