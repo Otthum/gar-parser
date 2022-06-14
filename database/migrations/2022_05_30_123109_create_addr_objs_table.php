@@ -45,6 +45,7 @@ return new class extends Migration
             $table->boolean('is_active')->comment('Действует ли данный объект');
 
             $table->timestamps();
+            $table->index(['is_active', 'updated_at']);
         });
     }
 

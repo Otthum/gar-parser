@@ -38,6 +38,7 @@ class UpdateAddressStr extends Command
     ];
 
     protected int $total = 0;
+    protected int $skipped = 0;
 
 
     /**
@@ -54,15 +55,15 @@ class UpdateAddressStr extends Command
         $dateTo = new \DateTime();
 
         $classes = [
+            AddrObj::class => [
+                'munHierarchy',
+                'type',
+            ],
             House::class => [
                 'munHierarchy',
                 'type',
                 'addTypeFirst',
                 'addTypeSecond',
-            ],
-            AddrObj::class => [
-                'munHierarchy',
-                'type',
             ],
         ];
 
@@ -72,7 +73,7 @@ class UpdateAddressStr extends Command
                 ->where('updated_at', '<=', $dateTo->format('Y-m-d H:i:s'))
                 ->limit($this->limit)
                 ->with($relations)
-                ->orderBy('id', 'asc');
+                ->orderBy('updated_at', 'asc');
 
             if (!$this->option('all')) {
                 $q->where('updated_at', '>=', $dateFrom->format('Y-m-d H:i:s'));
@@ -83,17 +84,22 @@ class UpdateAddressStr extends Command
 
                 $objects = $q->get();
 
+                $objectsFetched = microtime(true);
+
                 if ($objects->count() == 0) {
                     break;
                 }
 
                 $parents = $this->collectParents($objects);
 
+                $parentsFetched = microtime(true);
+
                 foreach ($objects as $object) {
                     $this->toCommit['objects'][] = $object->id;
                     $currentParentIds = $this->explodeObjectPath($object);
 
                     if ( !$currentParentIds ) {
+                        $this->skipped++;
                         continue;
                     }
 
@@ -122,13 +128,13 @@ class UpdateAddressStr extends Command
                 $class::whereIn('id', $this->toCommit['objects'])->update(['updated_at' => (new \DateTime())->format('Y-m-d H:i:s')]);
 
                 echo sprintf(
-                    "\rОбновлено %d адресов за %f секунд (итерация завершена за %f, обновлено %d иерархий и %d объектов, уникальных родителей в итерации - %d)",
+                    "\rОбновлено %d/пропущено %d адресов за %f секунд (итерация завершена за %f, тайминг объектов - %f, тайминг родителей - %f)",
                     $this->total,
+                    $this->skipped,
                     microtime(true) - $start,
                     microtime(true) - $singleIterationTime,
-                    count($this->toCommit['hierarchies']),
-                    count($this->toCommit['objects']),
-                    count($parents)
+                    $objectsFetched - $singleIterationTime,
+                    $parentsFetched - $objectsFetched,
                 );
                 $this->toCommit = [
                     'objects' => [],
