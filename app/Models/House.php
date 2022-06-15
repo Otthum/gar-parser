@@ -19,7 +19,7 @@ class House extends Model
         $res = '';
 
         if ($this->type) {
-            $res .= ' ' . ($this->type->short ?? $this->type->name) . ' ' . $this->num;
+            $res .= ($this->type->short ?? $this->type->name) . ' ' . $this->num;
         }
 
         if ($this->addTypeFirst) {
