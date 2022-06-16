@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\AddrObj;
 use App\Models\House;
 use App\Models\MunHierarchy;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -104,12 +105,30 @@ class UpdateAddressStr extends Command
                     }
 
                     $str = '';
-                    foreach ($currentParentIds as $id) {
-                        if ($id == $object->gar_id) {
-                            continue;
+
+                    try {
+                        foreach ($currentParentIds as $id) {
+                            if ($id == $object->gar_id) {
+                                continue;
+                            }
+    
+                            if ($parents[$id] == null) {
+                                throw new Exception(
+                                    sprintf(
+                                        "У объекта %d (%s) отсутсвует часть адреса (gar id - %d).",
+                                        $object->gar_id,
+                                        $class,
+                                        $id
+                                    )
+                                );
+                            }
+                            $str .= $parents[$id]->getSelfAddress() . ', ';
                         }
-                        $str .= $parents[$id]->getSelfAddress() . ', ';
+                    } catch (Exception $e) {
+                        echo $e->getMessage() . " Пропускаем этот объект\n";
+                        continue;
                     }
+                    
                     $str .= $object->getSelfAddress();
 
                     $munHierarchy = $object->munHierarchy->toArray();
