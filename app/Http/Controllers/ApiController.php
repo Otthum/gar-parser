@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\MunHierarchy;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\SearchTermsConverterService as Converter;
 
 class ApiController extends Controller
 {
@@ -29,9 +30,25 @@ class ApiController extends Controller
         EOT;
 
         $search = preg_replace('~, *~', ' ', $search);
+        $search = Converter::convert($search);
 
         $ids = DB::select($query, [$search, $search]);
 
+        if (count($ids) > 0) {
+            $addresses = $this->getAddressesFromIds($ids);
+        }
+
+        $results = [
+            'items' => $addresses ?? [],
+            'result' => true,
+            'search' => $search,
+        ];
+        
+        return response()->json($results);
+    }
+
+    protected function getAddressesFromIds(array $ids, int $limit = 10)
+    {
         $idsToFetch = [];
         $biggestRel = $ids[0]->rel;
         foreach ($ids as $item) {
@@ -42,7 +59,7 @@ class ApiController extends Controller
             }
         }
 
-        $results = MunHierarchy::select(
+        $addresses = MunHierarchy::select(
             'mun_hierarchies.gar_id',
             'address_str',
         )
@@ -52,9 +69,10 @@ class ApiController extends Controller
             ->orderByRaw(
                 'cast(houses.num as signed) asc, length(houses.num) asc, cast(houses.num_1 as signed) asc'
             )
-            ->limit($req->limit ?? 10)
-            ->get()->toArray();        
-        
-        return response()->json($results);
+            ->limit($limit)
+            ->get()
+            ->toArray();
+
+        return $addresses;
     }
 }
