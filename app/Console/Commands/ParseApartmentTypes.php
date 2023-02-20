@@ -2,18 +2,18 @@
 
 namespace App\Console\Commands;
 
-use App\Models\AppartmentType;
+use App\Models\ApartmentType;
 use Illuminate\Console\Command;
 use SimpleXMLElement;
 
-class ParseAppartmentTypes extends AbstractGarParserCommand
+class ParseApartmentTypes extends AbstractGarParserCommand
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'gar:parse:appart-types  {path : Путь до архива с выгрузкой внутри папки "storage/app/gar"}';
+    protected $signature = 'gar:parse:apartments-types  {path : Путь до архива с выгрузкой внутри папки "storage/app/gar"}';
 
     /**
      * The console command description.
@@ -29,7 +29,7 @@ class ParseAppartmentTypes extends AbstractGarParserCommand
 
     protected $isSpecificForRegion = false;
 
-    protected $parsingClass = AppartmentType::class;
+    protected $parsingClass = ApartmentType::class;
 
 
     protected function parseItem($item)

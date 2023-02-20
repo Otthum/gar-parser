@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Apartment;
-use App\Models\AppartmentType;
+use App\Models\ApartmentType;
 use Illuminate\Support\Facades\Log;
 
 class ParseApartments extends AbstractGarParserCommand
@@ -32,7 +32,7 @@ class ParseApartments extends AbstractGarParserCommand
 
     protected $parsingClass = Apartment::class;
 
-    protected $types = [];
+    protected static $types = [];
 
 
     protected function parseItem($item)
@@ -64,13 +64,13 @@ class ParseApartments extends AbstractGarParserCommand
 
     protected function validateType($type)
     {
-        if (count($this->types) == 0) {
-            $types = AppartmentType::select('gar_id')->get()->toArray();
+        if (count(self::$types) == 0) {
+            $types = ApartmentType::select('gar_id')->get()->toArray();
             foreach ($types as $t) {
-                $this->types[] = $t['gar_id'];
+                self::$types[] = $t['gar_id'];
             }
         }
 
-        return in_array($type, $this->types);
+        return in_array($type, self::$types);
     }
 }

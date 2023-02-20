@@ -17,6 +17,6 @@ class Apartment extends Model
 
     public function type()
     {
-        return $this->hasOne(AppartmentType::class, 'type_id', 'gar_id');
+        return $this->hasOne(ApartmentType::class, 'type_id', 'gar_id');
     }
 }
