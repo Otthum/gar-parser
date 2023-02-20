@@ -51,6 +51,13 @@ return [
     */
 
     'channels' => [
+        'parsing' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/parsing.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 30,
+        ],
+
         'stack' => [
             'driver' => 'stack',
             'channels' => ['single'],

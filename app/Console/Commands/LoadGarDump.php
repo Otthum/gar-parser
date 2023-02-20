@@ -94,6 +94,8 @@ class LoadGarDump extends Command
         $this->call('gar:parse:houses', ['path' => $local]);
         $this->call('gar:parse:house-params', ['path' => $local]);
         $this->call('gar:parse:add-objects', ['path' => $local]);
+        $this->call('gar:parse:apartments', ['path' => $local]);
+        $this->call('gar:parse:apartments-params', ['path' => $local]);
         
         $this->call('gar:parse:mun-hierarchy', ['path' => $local]);
 
