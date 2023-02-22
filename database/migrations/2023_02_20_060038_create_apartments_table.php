@@ -27,6 +27,8 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('type_id')->references('gar_id')->on('apartment_types');
+
+            $table->index(['is_active', 'updated_at']); # Индекс для поиска объектов при сборе address_str
         });
     }
 
