@@ -14,11 +14,15 @@ class AddrObj extends Model
     ];
 
 
-    public function getSelfAddress()
+    public function getSelfAddressShort()
     {
         return $this->short . ' ' . $this->name;
     }
 
+    public function getSelfAddressFull()
+    {
+        return AddrObjType::shortToFull($this->short, $this->level) . ' ' . $this->name;
+    }
 
     public function munHierarchy()
     {

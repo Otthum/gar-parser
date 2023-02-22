@@ -15,8 +15,24 @@ class Apartment extends Model
     ];
 
 
+    public function getSelfAddressShort()
+    {
+        return $this->type->short . ' ' . $this->number;
+    }
+
+    public function getSelfAddressFull()
+    {
+        return $this->type->name . ' ' . $this->number;
+    }
+
+
+    public function munHierarchy()
+    {
+        return $this->belongsTo(MunHierarchy::class, 'gar_id', 'gar_id');
+    }
+
     public function type()
     {
-        return $this->hasOne(ApartmentType::class, 'type_id', 'gar_id');
+        return $this->hasOne(ApartmentType::class, 'gar_id', 'type_id');
     }
 }

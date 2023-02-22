@@ -14,20 +14,38 @@ class House extends Model
     ];
 
 
-    public function getSelfAddress()
+    public function getSelfAddressShort()
+    {
+        return $this->buildAddress([
+            'name' => $this->type ? $this->type->short : null,
+            'addTypeFirst' => $this->addTypeFirst ? $this->addTypeFirst->short : null,
+            'addTypeSecond' => $this->addTypeSecond ? $this->addTypeSecond->short : null,
+        ]);
+    }
+
+    public function getSelfAddressFull()
+    {
+        return $this->buildAddress([
+            'name' => $this->type ? $this->type->name : null,
+            'addTypeFirst' => $this->addTypeFirst ? $this->addTypeFirst->name : null,
+            'addTypeSecond' => $this->addTypeSecond ? $this->addTypeSecond->name : null,
+        ]);
+    }
+
+    protected function buildAddress(array $parts)
     {
         $res = '';
 
-        if ($this->type) {
-            $res .= ($this->type->short ?? $this->type->name) . ' ' . $this->num;
+        if ($parts['name']) {
+            $res .= $parts['name'] . ' ' . $this->num;
         }
 
-        if ($this->addTypeFirst) {
-            $res .= ' ' . ($this->addTypeFirst->short ?? $this->addTypeFirst->name) . ' ' . $this->num_1;
+        if ($parts['addTypeFirst']) {
+            $res .= ' ' . $parts['addTypeFirst'] . ' ' . $this->num_1;
         }
 
-        if ($this->addTypeSecond) {
-            $res .= ' ' . ($this->addTypeSecond->short ?? $this->addTypeSecond->name) . ' ' . $this->num_2;
+        if ($parts['addTypeSecond']) {
+            $res .= ' ' . $parts['addTypeSecond'] . ' ' . $this->num_2;
         }
 
         return $res == '' ? null : $res;

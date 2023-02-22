@@ -3,10 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Models\AddrObj;
+use App\Models\Apartment;
 use App\Models\House;
 use App\Models\MunHierarchy;
 use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class UpdateAddressStr extends Command
@@ -28,7 +30,7 @@ class UpdateAddressStr extends Command
     /**
      * Сколько записей брать за раз
      */
-    protected $limit = 500;
+    protected $limit = 5000;
 
     /**
      * Обработанные данные, которые будут занесены в базу
@@ -66,6 +68,10 @@ class UpdateAddressStr extends Command
                 'addTypeFirst',
                 'addTypeSecond',
             ],
+            Apartment::class => [
+                'munHierarchy',
+                'type',
+            ],
         ];
 
         foreach ($classes as $class => $relations) {
@@ -91,7 +97,7 @@ class UpdateAddressStr extends Command
                     break;
                 }
 
-                $parents = $this->collectParents($objects);
+                $parents = $this->collectParents($objects, $class);
 
                 $parentsFetched = microtime(true);
 
@@ -122,14 +128,14 @@ class UpdateAddressStr extends Command
                                     )
                                 );
                             }
-                            $str .= $parents[$id]->getSelfAddress() . ', ';
+                            $str .= $parents[$id]->getSelfAddressFull() . ', ';
                         }
                     } catch (Exception $e) {
                         echo $e->getMessage() . " Пропускаем этот объект\n";
                         continue;
                     }
                     
-                    $str .= $object->getSelfAddress();
+                    $str .= $object->getSelfAddressFull();
 
                     $munHierarchy = $object->munHierarchy->toArray();
                     unset(
@@ -187,7 +193,7 @@ class UpdateAddressStr extends Command
     /**
      * Возвращает массив уникальных родителей со всех переданных объектов
      */
-    protected function collectParents($objects)
+    protected function collectParents(Collection $objects, string $targetClass)
     {
         /**
          * Пройдем по всем объектам и собёрм ID всех возможных родителей
@@ -203,14 +209,34 @@ class UpdateAddressStr extends Command
             }
         }
 
+
+        $parentModels = [
+            AddrObj::class,
+        ];
+
+        if ($targetClass == Apartment::class) {
+            $parentModels[] = House::class;
+        }
+
         /**
          * Получаем всех родителей и записываем их к соответствующему ID в массиве
          */
-        $parentModels = AddrObj::whereIn('gar_id', array_keys($parentByIds))->get();
-        foreach ($parentModels as $parentModel) {
-            $parentByIds[$parentModel->gar_id] = $parentModel;
+        foreach ($parentModels as $class) {
+            $models = $class::whereIn('gar_id', array_keys($parentByIds))->get();
+            foreach ($models as $model) {
+                $parentByIds[$model->gar_id] = $model;
+            }
         }
+        
 
         return $parentByIds;
     }
 }
+
+
+/**
+ * type - this will be a foreign key to param_types table
+ * value - this is a plane value, like house number
+ * dictionary_type - 
+ * dictionary_value 
+ */
