@@ -83,7 +83,7 @@ class LoadGarDump extends Command
         $this->call('gar:parse:param-types', ['path' => $local]);
         $this->call('gar:parse:add-house-types', ['path' => $local]);
         $this->call('gar:parse:addr-obj-types', ['path' => $local]);
-        $this->call('gar:parse:appart-types', ['path' => $local]);
+        $this->call('gar:parse:apartments-types', ['path' => $local]);
         $this->call('gar:parse:object-levels', ['path' => $local]);
         $this->call('gar:parse:operation-types', ['path' => $local]);
         $this->call('gar:parse:room-types', ['path' => $local]);
