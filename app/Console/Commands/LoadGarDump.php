@@ -13,7 +13,11 @@ class LoadGarDump extends Command
      *
      * @var string
      */
-    protected $signature = 'gar:load {date=latest : Дата выгрузки. Базово ищет последнюю} {--full}';
+    protected $signature = 'gar:load
+        {date=latest : Дата выгрузки. Базово ищет последнюю}
+        {--full : Загрузить полный архив или дельту}
+        {--parse : Начать парсинг по завершению загрузки}
+        {--region= : Регион, данные по которому будут разобраны. Используется только если указана опция --parse. Базово парсит все регионы}';
 
     /**
      * The console command description.
@@ -78,26 +82,39 @@ class LoadGarDump extends Command
             $local = $this->load($formatedDate);
         }
 
+
+        if ($this->option('parse') == false) {
+            return;
+        }
+
         $start = new \DateTime();
 
-        $this->call('gar:parse:param-types', ['path' => $local]);
-        $this->call('gar:parse:add-house-types', ['path' => $local]);
-        $this->call('gar:parse:addr-obj-types', ['path' => $local]);
-        $this->call('gar:parse:apartments-types', ['path' => $local]);
-        $this->call('gar:parse:object-levels', ['path' => $local]);
-        $this->call('gar:parse:operation-types', ['path' => $local]);
-        $this->call('gar:parse:room-types', ['path' => $local]);
-        $this->call('gar:parse:doc-kinds', ['path' => $local]);
-        $this->call('gar:parse:doc-types', ['path' => $local]);
-        $this->call('gar:parse:house-types', ['path' => $local]);
+        $parsingOptions = [
+            'path' => $local
+        ];
+
+        $this->call('gar:parse:param-types', $parsingOptions);
+        $this->call('gar:parse:add-house-types', $parsingOptions);
+        $this->call('gar:parse:addr-obj-types', $parsingOptions);
+        $this->call('gar:parse:apartments-types', $parsingOptions);
+        $this->call('gar:parse:object-levels', $parsingOptions);
+        $this->call('gar:parse:operation-types', $parsingOptions);
+        $this->call('gar:parse:room-types', $parsingOptions);
+        $this->call('gar:parse:doc-kinds', $parsingOptions);
+        $this->call('gar:parse:doc-types', $parsingOptions);
+        $this->call('gar:parse:house-types', $parsingOptions);
+
+        if ($this->option('region')) {
+            $parsingOptions['region'] = $this->option('region');
+        }
         
-        $this->call('gar:parse:houses', ['path' => $local]);
-        $this->call('gar:parse:house-params', ['path' => $local]);
-        $this->call('gar:parse:add-objects', ['path' => $local]);
-        $this->call('gar:parse:apartments', ['path' => $local]);
-        $this->call('gar:parse:apartments-params', ['path' => $local]);
+        $this->call('gar:parse:houses', $parsingOptions);
+        $this->call('gar:parse:house-params', $parsingOptions);
+        $this->call('gar:parse:add-objects', $parsingOptions);
+        $this->call('gar:parse:apartments', $parsingOptions);
+        $this->call('gar:parse:apartments-params', $parsingOptions);
         
-        $this->call('gar:parse:mun-hierarchy', ['path' => $local]);
+        $this->call('gar:parse:mun-hierarchy', $parsingOptions);
 
         $this->call('gar:address-str', ['date' => $start->format('c')]);
     }
