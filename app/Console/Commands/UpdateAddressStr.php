@@ -52,6 +52,8 @@ class UpdateAddressStr extends Command
     public function handle()
     {
         $start = microtime(true);
+        DB::select(DB::raw("SET in_predicate_conversion_threshold=0"));
+        DB::select(DB::raw("RESET QUERY CACHE"));
 
         DB::connection()->unsetEventDispatcher();
         $dateFrom = new \DateTime($this->argument('date'));
@@ -90,7 +92,6 @@ class UpdateAddressStr extends Command
                 $singleIterationTime = microtime(true);
 
                 $objects = $q->get();
-
                 $objectsFetched = microtime(true);
 
                 if ($objects->count() == 0) {
@@ -103,63 +104,77 @@ class UpdateAddressStr extends Command
 
                 foreach ($objects as $object) {
                     $this->toCommit['objects'][] = $object->id;
-                    $currentParentIds = $this->explodeObjectPath($object);
 
-                    if ( !$currentParentIds ) {
-                        $this->skipped++;
-                        continue;
-                    }
-
-                    $str = '';
-
-                    try {
-                        foreach ($currentParentIds as $id) {
-                            if ($id == $object->gar_id) {
-                                continue;
-                            }
-    
-                            if ($parents[$id] == null) {
-                                throw new Exception(
-                                    sprintf(
-                                        "У объекта %d (%s) отсутсвует часть адреса (gar id - %d).",
-                                        $object->gar_id,
-                                        $class,
-                                        $id
-                                    )
-                                );
-                            }
-                            $str .= $parents[$id]->getSelfAddressFull() . ', ';
+                    foreach ($object->munHierarchy as $munHierarchy) {
+                        $currentParentIds = $this->explodeObjectPath($munHierarchy);
+        
+                        if ( !$currentParentIds ) {
+                            $this->skipped++;
+                            continue;
                         }
-                    } catch (Exception $e) {
-                        echo $e->getMessage() . " Пропускаем этот объект\n";
-                        continue;
+        
+                        $str = '';
+        
+                        try {
+                            foreach ($currentParentIds as $id) {
+                                if ($id == $object->gar_id) {
+                                    continue;
+                                }
+            
+                                if ($parents[$id] == null) {
+                                    throw new Exception(
+                                        sprintf(
+                                            "У иерархии %d объекта %s (%s) отсутствует часть адреса (gar id - %d).",
+                                            $munHierarchy->id,
+                                            $object->gar_id,
+                                            $class,
+                                            $id
+                                        )
+                                    );
+                                }
+                                $str .= $parents[$id]->getSelfAddressFull() . ', ';
+                            }
+                        } catch (Exception $e) {
+                            $this->skipped++;
+                            echo $e->getMessage() . " Пропускаем эту иерархию\n";
+                            continue;
+                        }
+        
+                        $str .= $object->getSelfAddressFull();
+        
+                        $hierarchyData = $munHierarchy->toArray();
+                        unset(
+                            $hierarchyData['created_at'],
+                            $hierarchyData['updated_at'],
+                        );
+        
+                        $hierarchyData['address_str'] = $str;
+                        $this->total++;
+                        $this->toCommit['hierarchies'][] = $hierarchyData;
                     }
-                    
-                    $str .= $object->getSelfAddressFull();
-
-                    $munHierarchy = $object->munHierarchy->toArray();
-                    unset(
-                        $munHierarchy['created_at'],
-                        $munHierarchy['updated_at'],
-                    );
-
-                    $munHierarchy['address_str'] = $str;
-                    $this->total++;
-                    $this->toCommit['hierarchies'][] = $munHierarchy;
                 }
 
-                MunHierarchy::upsert($this->toCommit['hierarchies'], ['gar_id']);
+                $operationsFinished = microtime(true);
+
+                MunHierarchy::upsert($this->toCommit['hierarchies'], ['id']);
+
+                $hierarchiesUpdated = microtime(true);
 
                 $class::whereIn('id', $this->toCommit['objects'])->update(['updated_at' => (new \DateTime())->format('Y-m-d H:i:s')]);
 
+                $objectsUpdated = microtime(true);
+
                 echo sprintf(
-                    "\rОбновлено %d/пропущено %d адресов за %f секунд (итерация завершена за %f, тайминг объектов - %f, тайминг родителей - %f)",
+                    "\rОбновлено %d/пропущено %d адресов за %f секунд (итерация завершена за %f, объекты (s) - %f, родители (s) - %f, логика - %f, иерархии (u) - %f, объекты (u) - %f",
                     $this->total,
                     $this->skipped,
                     microtime(true) - $start,
                     microtime(true) - $singleIterationTime,
                     $objectsFetched - $singleIterationTime,
                     $parentsFetched - $objectsFetched,
+                    $operationsFinished - $parentsFetched,
+                    $hierarchiesUpdated - $operationsFinished,
+                    $objectsUpdated - $hierarchiesUpdated,
                 );
                 $this->toCommit = [
                     'objects' => [],
@@ -174,16 +189,16 @@ class UpdateAddressStr extends Command
     /**
      * Разбивает иерархиую объекта на массив из соответсвующих ID
      */
-    protected function explodeObjectPath($object)
+    protected function explodeObjectPath(?MunHierarchy $munHierarchy)
     {
         try {
-            $ids = explode('.', $object->munHierarchy->path);
+            $ids = explode('.', $munHierarchy->path);
         } catch (\Throwable $e) {
-            echo sprintf(
+            /* echo sprintf(
                 "Объект класса %s (garId - %d) не имеет записи в иерархии\n",
                 get_class($object),
                 $object->gar_id
-            );
+            ); */
             return false;
         }
 
@@ -193,20 +208,27 @@ class UpdateAddressStr extends Command
     /**
      * Возвращает массив уникальных родителей со всех переданных объектов
      */
-    protected function collectParents(Collection $objects, string $targetClass)
+    protected function collectParents(Collection $objects, string $class)
     {
         /**
          * Пройдем по всем объектам и собёрм ID всех возможных родителей
          */
         $parentByIds = [];
         foreach ($objects as $object) {
-            if ($currentParentIds = $this->explodeObjectPath($object)) {
-                foreach ($currentParentIds as $id) {
-                    if ($object->gar_id != $id) {
-                        $parentByIds[$id] = null;
+
+            /**
+             * Так как объекты могут иметь несколько записей в иерархии - обработаем каждую отдельно
+             */
+            foreach ($object->munHierarchy as $munHierarchy) {
+                if ($currentParentIds = $this->explodeObjectPath($munHierarchy)) {
+                    foreach ($currentParentIds as $id) {
+                        if ($object->gar_id != $id) {
+                            $parentByIds[$id] = null;
+                        }
                     }
                 }
             }
+            
         }
 
 
@@ -214,7 +236,7 @@ class UpdateAddressStr extends Command
             AddrObj::class,
         ];
 
-        if ($targetClass == Apartment::class) {
+        if ($class == Apartment::class) {
             $parentModels[] = House::class;
         }
 
@@ -232,11 +254,3 @@ class UpdateAddressStr extends Command
         return $parentByIds;
     }
 }
-
-
-/**
- * type - this will be a foreign key to param_types table
- * value - this is a plane value, like house number
- * dictionary_type - 
- * dictionary_value 
- */

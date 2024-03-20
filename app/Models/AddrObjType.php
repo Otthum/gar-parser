@@ -32,4 +32,9 @@ class AddrObjType extends Model
 
         return self::$shortsMap[$short][$level];
     }
+
+    public function objects()
+    {
+        return $this->hasMany(AddrObj::class, 'type_id', 'gar_id');
+    }
 }

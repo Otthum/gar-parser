@@ -26,7 +26,7 @@ class AddrObj extends Model
 
     public function munHierarchy()
     {
-        return $this->hasOne(MunHierarchy::class, 'gar_id', 'gar_id');
+        return $this->hasMany(MunHierarchy::class, 'gar_id', 'gar_id');
     }
 
     public function type()

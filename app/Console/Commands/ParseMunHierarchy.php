@@ -25,6 +25,8 @@ class ParseMunHierarchy extends AbstractGarParserCommand
      */
     protected $fileNamePattern = 'AS_MUN_HIERARCHY_.+?\.xml';
 
+    protected $uniqeFields = ['gar_id', 'parent_gar_id'];
+
     protected $parsingClass = MunHierarchy::class;
 
 
