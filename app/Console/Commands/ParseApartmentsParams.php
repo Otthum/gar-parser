@@ -13,6 +13,7 @@ class ParseApartmentsParams extends AbstractGarParserCommand
      */
     protected $signature = 'gar:parse:apartments-params
         {path : Путь до архива с выгрузкой внутри папки "storage/app/gar"}
+        {region=all : Регион для парсинга. Базово парсит все}
     ';
 
     /**
@@ -30,8 +31,6 @@ class ParseApartmentsParams extends AbstractGarParserCommand
     protected $uniqueFields = ['gar_id', 'type_id'];
 
     protected $parsingClass = Param::class;
-    
-    protected $isSpecificForRegion = false;
     
 
     protected function parseItem($item)

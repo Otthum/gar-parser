@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Services\GarParserService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
 use ZipArchive;
 
 class LoadGarDump extends Command
@@ -88,33 +89,11 @@ class LoadGarDump extends Command
         }
 
         $start = new \DateTime();
-
-        $parsingOptions = [
-            'path' => $local
-        ];
-
-        $this->call('gar:parse:param-types', $parsingOptions);
-        $this->call('gar:parse:add-house-types', $parsingOptions);
-        $this->call('gar:parse:addr-obj-types', $parsingOptions);
-        $this->call('gar:parse:apartments-types', $parsingOptions);
-        $this->call('gar:parse:object-levels', $parsingOptions);
-        $this->call('gar:parse:operation-types', $parsingOptions);
-        $this->call('gar:parse:room-types', $parsingOptions);
-        $this->call('gar:parse:doc-kinds', $parsingOptions);
-        $this->call('gar:parse:doc-types', $parsingOptions);
-        $this->call('gar:parse:house-types', $parsingOptions);
-
-        if ($this->option('region')) {
-            $parsingOptions['region'] = $this->option('region');
-        }
         
-        $this->call('gar:parse:houses', $parsingOptions);
-        $this->call('gar:parse:house-params', $parsingOptions);
-        $this->call('gar:parse:add-objects', $parsingOptions);
-        $this->call('gar:parse:apartments', $parsingOptions);
-        $this->call('gar:parse:apartments-params', $parsingOptions);
-        
-        $this->call('gar:parse:mun-hierarchy', $parsingOptions);
+        Artisan::call('gar:parse', [
+            'path' => $local,
+            'region' => $this->option('region')
+        ]);
 
         $this->call('gar:address-str', ['date' => $start->format('c')]);
     }
