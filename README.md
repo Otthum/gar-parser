@@ -1,64 +1,37 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+## Получение архива с дампом адресов
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+```php artisan gar:load date --full```
 
-## About Laravel
+Где:
+1. `date (default=latest)` - дата выгрузки на сайте [fias.nalog.ru](fias.nalog.ru). Данные есть не на все даты. Для получения самой свежей этот аргумент можно не использовать.
+2. `--full` - если установлен этот флаг, то будет загружен весь архив (33gb+). Без него будет загружена только изменения от последней выгрузки.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Архив будет сохранён в папке `storage\app\gar\{date}` с именем `arch_full.zip` при запросе полной выгрузки и `arch.zip` при загрузке изменений.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Парсинг полученных данных
 
-## Learning Laravel
+Все команды для парсинга полученных данных находятся в пространстве имён `gar:parse` и обрабатывают конкретный тип файла и имеют следующую запись:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+```php artisan gar:parse:<command name> path --region=```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Где:
+1. `<command name>` - имя команды. Полный список можно получить выполнив `php artisan list`.
+2. `path` - путь до архива с данными внутри папки `storage\app\gar\` вида "дата\имя архива". Пример: `2023.07.26\arch.zip`.
+3. `--region= (default=null)` - указание на то, с какого региона брать данные. Некоторые виды данных разделены внутри архива на подпапки по принадлежности к региону и базово команда будет разбирать весь архив. Указывается в виде номера региона из двух знаков, например для Москвы будет `77`, для Башкортостана - `02`.
 
-## Laravel Sponsors
+## Сбор полной строки адреса
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+В самих данных не поставляется полный адрес для, например, дома. Есть лишь его муниципальная и административная иерархия (цепочка родителей). Для получения полной адресной строки для всех элементов в базе (квартиры, строения, адресные объекты) существует следующая команда:
 
-### Premium Partners
+```php artisan gar:address-str date --all```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+Где:
+1. `date` - дата обновления объектов от которой нужно собрать адреса. Например, при передаче даты "26.07.2023 12:34:56" будут пересчитаны только те записи, что были обновлены между указанной и текущей датой.
+2. `--all` - опционально. Если был передан, то будет обновлена вся база.
 
-## Contributing
+## Поиск по собранным данным
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Для запуска поиска существует эндпоинт `/api/search?q=`. В параметр `q` следует передать строку для поиска.
 
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Поиск осуществляется с помощью полнотекстового поиска и так как в базовых настройках минимальное кол-во символов для слова указано как `3`, некоторые города, например "Уфа", и почти все дома и квартиры будут проигнорированы. Для того, чтобы это исправить, в конфигах базы (MySQL) параметр `innodb_ft_min_token_size` можно установить со значением `1`.
