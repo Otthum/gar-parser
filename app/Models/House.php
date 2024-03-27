@@ -51,6 +51,11 @@ class House extends Model
         return $res == '' ? null : $res;
     }
 
+    public function getLevel()
+    {
+        return 10;
+    }
+
 
     public function munHierarchy()
     {

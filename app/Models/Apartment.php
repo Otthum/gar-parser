@@ -25,6 +25,11 @@ class Apartment extends Model
         return $this->type->name . ' ' . $this->number;
     }
 
+    public function getLevel()
+    {
+        return 11;
+    }
+
 
     public function munHierarchy()
     {

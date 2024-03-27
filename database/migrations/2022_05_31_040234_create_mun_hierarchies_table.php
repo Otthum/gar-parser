@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('mun_hierarchies', function (Blueprint $table) {
             $table->id();
 
-            $table->bigInteger('gar_id')->unsigned()->unique()->comment('id объекта из справочника ГАР');
+            $table->bigInteger('gar_id')->unsigned()->comment('id объекта из справочника ГАР');
             $table->bigInteger('parent_gar_id')->unsigned()->nullable()->comment('id родительского объекта из справочника ГАР');
 
             /**
@@ -41,6 +41,19 @@ return new class extends Migration
             $table->bigInteger('change_id')->unsigned()->comment('id записи изменения из AS_CHANGE_HISTORY'); */
 
             $table->boolean('is_active');
+
+            /**
+             * Так как один адресный объект может иметь несколько родителей
+             * (Например, длинная улица, проходящая через несколько мунципальных районов города)
+             * то уникальность установим на эти два поля, а не на gar_id
+             */
+            $table->unique(["gar_id", "parent_gar_id"]);
+
+
+            /**
+             * Индекс нужен для получения иерархии объекта в процессе формирования строчного адреса
+             */
+            $table->index(['gar_id', 'is_active']);
 
             $table->timestamps();
         });

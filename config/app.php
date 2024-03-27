@@ -212,4 +212,16 @@ return [
         // 'ExampleClass' => App\Example\ExampleClass::class,
     ])->toArray(),
 
+
+    /**
+     * Custom
+     */
+
+    'elastic_user' => env('ELASTIC_USER', 'elastic'),
+
+    'elastic_pass' => env('ELASTIC_PASS'),
+
+    'elastic_host' => env('ELASTIC_HOST', 'https://localhost'),
+
+    'elastic_port' => env('ELASTIC_PORT', '9200'),
 ];

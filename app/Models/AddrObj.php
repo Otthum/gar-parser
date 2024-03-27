@@ -24,6 +24,12 @@ class AddrObj extends Model
         return AddrObjType::shortToFull($this->short, $this->level) . ' ' . $this->name;
     }
 
+    public function getLevel()
+    {
+        return $this->level;
+    }
+
+
     public function munHierarchy()
     {
         return $this->hasMany(MunHierarchy::class, 'gar_id', 'gar_id');

@@ -6,6 +6,7 @@ use App\Models\AddrObj;
 use App\Models\Apartment;
 use App\Models\House;
 use App\Models\MunHierarchy;
+use App\Services\Elastic\ElasticSearchService;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Collection;
@@ -52,6 +53,8 @@ class UpdateAddressStr extends Command
     public function handle()
     {
         $start = microtime(true);
+        $elasticSearchService = new ElasticSearchService;
+
         DB::select(DB::raw("SET in_predicate_conversion_threshold=0"));
         DB::select(DB::raw("RESET QUERY CACHE"));
 
@@ -77,6 +80,13 @@ class UpdateAddressStr extends Command
         ];
 
         foreach ($classes as $class => $relations) {
+            $iterations = 0;
+            $averageIteration = 0;
+            $averageSelectObjects = 0;
+            $averageSelectParents = 0;
+            $averageLogicCalc = 0;
+            $averageAddressSave = 0;
+            $averageObjectsSave = 0;
 
             $q = $class::where('is_active', true)
                 ->where('updated_at', '<=', $dateTo->format('Y-m-d H:i:s'))
@@ -89,7 +99,8 @@ class UpdateAddressStr extends Command
             }
 
             while (true) {
-                $singleIterationTime = microtime(true);
+                $iterationStart = microtime(true);
+                $iterations++;
 
                 $objects = $q->get();
                 $objectsFetched = microtime(true);
@@ -139,16 +150,23 @@ class UpdateAddressStr extends Command
                             echo $e->getMessage() . " Пропускаем эту иерархию\n";
                             continue;
                         }
-        
-                        $str .= $object->getSelfAddressFull();
-        
-                        $hierarchyData = $munHierarchy->toArray();
-                        unset(
-                            $hierarchyData['created_at'],
-                            $hierarchyData['updated_at'],
-                        );
-        
-                        $hierarchyData['address_str'] = $str;
+
+                        $hierarchyData = [
+                            'id' => $munHierarchy->path,
+                            'data' => [
+                                'id' => $object->gar_id,
+                                'uuid' => $object->gar_guid,
+                                'address' => $str . $object->getSelfAddressFull(),
+                                'parent' => trim($str, " ,"),
+                                'level' => $object->getLevel(),
+                                'active' => $munHierarchy->is_active
+                            ]
+                        ];
+
+                        $hierarchyData['data']['number'] = $class == House::class
+                            ? (int) $object->num
+                            : 0;
+
                         $this->total++;
                         $this->toCommit['hierarchies'][] = $hierarchyData;
                     }
@@ -156,7 +174,7 @@ class UpdateAddressStr extends Command
 
                 $operationsFinished = microtime(true);
 
-                MunHierarchy::upsert($this->toCommit['hierarchies'], ['id']);
+                $elasticSearchService->indexDocuments('gar', $this->toCommit['hierarchies']);
 
                 $hierarchiesUpdated = microtime(true);
 
@@ -164,25 +182,48 @@ class UpdateAddressStr extends Command
 
                 $objectsUpdated = microtime(true);
 
+                $iterationTime = microtime(true) - $iterationStart;
+                $objectsFetchedTime = $objectsFetched - $iterationStart;
+                $parentsFetchedTime = $parentsFetched - $objectsFetched;
+                $logicFinishedTime = $operationsFinished - $parentsFetched;
+                $addressSavedTime = $hierarchiesUpdated - $operationsFinished;
+                $objectsSavedTime = $objectsUpdated - $hierarchiesUpdated;
                 echo sprintf(
                     "\rОбновлено %d/пропущено %d адресов за %f секунд (итерация завершена за %f, объекты (s) - %f, родители (s) - %f, логика - %f, иерархии (u) - %f, объекты (u) - %f",
                     $this->total,
                     $this->skipped,
                     microtime(true) - $start,
-                    microtime(true) - $singleIterationTime,
-                    $objectsFetched - $singleIterationTime,
-                    $parentsFetched - $objectsFetched,
-                    $operationsFinished - $parentsFetched,
-                    $hierarchiesUpdated - $operationsFinished,
-                    $objectsUpdated - $hierarchiesUpdated,
+                    $iterationTime,
+                    $objectsFetchedTime,
+                    $parentsFetchedTime,
+                    $logicFinishedTime,
+                    $addressSavedTime,
+                    $objectsSavedTime,
                 );
+
+                $averageIteration += $iterationTime;
+                $averageSelectObjects += $objectsFetchedTime;
+                $averageSelectParents += $parentsFetchedTime;
+                $averageLogicCalc += $logicFinishedTime;
+                $averageAddressSave += $addressSavedTime;
+                $averageObjectsSave += $objectsSavedTime;
+
                 $this->toCommit = [
                     'objects' => [],
                     'hierarchies' => []
                 ];
             }
 
-            echo sprintf("\nКласс %s - done.\n", $class);
+            echo sprintf("\nКласс %s - done.\n\n", $class);
+            echo sprintf(
+                "Среднее время каждой категории:\nитерация - %s\nобъекты(s) - %s\nродители(s) - %s\nлогика - %s\nиерархии(u) - %s\nобъекты(u) - %s\n\n",
+                round($averageIteration / $iterations, 6),
+                round($averageSelectObjects / $iterations, 6),
+                round($averageSelectParents / $iterations, 6),
+                round($averageLogicCalc / $iterations, 6),
+                round($averageAddressSave / $iterations, 6),
+                round($averageObjectsSave / $iterations, 6),
+            );
         }
     }
 
@@ -244,7 +285,7 @@ class UpdateAddressStr extends Command
          * Получаем всех родителей и записываем их к соответствующему ID в массиве
          */
         foreach ($parentModels as $class) {
-            $models = $class::whereIn('gar_id', array_keys($parentByIds))->get();
+            $models = $class::whereIn('gar_id', array_keys($parentByIds))->with('type')->get();
             foreach ($models as $model) {
                 $parentByIds[$model->gar_id] = $model;
             }
