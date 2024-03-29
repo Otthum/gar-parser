@@ -26,7 +26,7 @@ class UpdateAddressStr extends Command
      *
      * @var string
      */
-    protected $description = 'Обновляет address_str колонку в иерархии';
+    protected $description = 'Собирает адрес в виде строки и индексирует его в elasticsearch';
 
     /**
      * Сколько записей брать за раз
