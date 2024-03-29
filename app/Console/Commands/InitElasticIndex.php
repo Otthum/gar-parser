@@ -42,7 +42,10 @@ class InitElasticIndex extends Command
                         ],
                         "autocomplete_search" => [
                             "tokenizer" => "whitespace",
-                            "filter" => ["lowercase"]
+                            "filter" => ["lowercase"],
+                            "char_filter" => [
+                                "dash_map"
+                            ]
                         ]
                     ],
                     "tokenizer" => [
@@ -53,6 +56,14 @@ class InitElasticIndex extends Command
                             "token_chars" => ["letter", "digit", "custom"],
                             "custom_token_chars" => ["/"],
                         ]
+                    ],
+                    "char_filter" => [
+                        "dash_map" => [
+                            "type" => "mapping",
+                            "mappings" => [
+                                "- => \\u0020", # Для поиска городов вроде Улан-Удэ, Ростов-на-Дону и т.д.
+                            ]
+                        ],
                     ]
                 ]
             ],
@@ -72,6 +83,9 @@ class InitElasticIndex extends Command
                     ],
                     "parent" => [
                         "type" => "keyword"
+                    ],
+                    "active" => [
+                        "type" => "boolean"
                     ],
                     "address" => [
                         "type" => "text",

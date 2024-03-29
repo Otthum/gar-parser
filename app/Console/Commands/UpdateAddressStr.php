@@ -159,7 +159,7 @@ class UpdateAddressStr extends Command
                                 'address' => $str . $object->getSelfAddressFull(),
                                 'parent' => trim($str, " ,"),
                                 'level' => $object->getLevel(),
-                                'active' => $munHierarchy->is_active
+                                'active' => (bool) $munHierarchy->is_active
                             ]
                         ];
 
